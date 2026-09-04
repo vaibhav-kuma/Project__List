@@ -1,0 +1,3 @@
+PORT = 8000
+MONGODB_URI=mongodb+srv://wafoxex669:vaibhav1234@cluster0.imhaz.mongodb.net
+CORS_ORIGIN =* 
