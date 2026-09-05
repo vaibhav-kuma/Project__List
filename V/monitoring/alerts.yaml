@@ -1,0 +1,91 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ninor-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: ninor-backend
+    rules:
+    - alert: BackendDown
+      expr: up{job="ninor-backend"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Backend is down"
+        description: "Backend pod {{ $labels.pod }} has been down for >1m"
+
+    - alert: HighErrorRate
+      expr: rate(http_requests_duration_seconds_count{status=~"5.."}[5m]) / rate(http_requests_duration_seconds_count[5m]) > 0.05
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High error rate ({{ $value | humanizePercentage }})"
+        description: "Backend error rate > 5% for 5m"
+
+    - alert: HighLatency
+      expr: histogram_quantile(0.95, rate(http_requests_duration_seconds_bucket[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High latency (p95: {{ $value }}s)"
+        description: "API p95 latency > 2s for 5m"
+
+    - alert: HighCPUUsage
+      expr: sum(rate(container_cpu_usage_seconds_total{namespace="ninor"}[5m])) by (pod) / sum(kube_pod_container_resource_limits{namespace="ninor", resource="cpu"}) by (pod) > 0.8
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU on {{ $labels.pod }}"
+        description: "CPU usage > 80% for 10m"
+
+    - alert: HighMemoryUsage
+      expr: sum(container_memory_working_set_bytes{namespace="ninor"}) by (pod) / sum(kube_pod_container_resource_limits{namespace="ninor", resource="memory"}) by (pod) > 0.85
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory on {{ $labels.pod }}"
+        description: "Memory usage > 85% for 10m"
+
+    - alert: DatabaseConnectionsHigh
+      expr: pg_stat_activity_count > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High DB connections"
+        description: "PostgreSQL connections > 80"
+
+    - alert: RedisMemoryHigh
+      expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Redis memory > 80%"
+        description: "Redis is using {{ $value | humanizePercentage }} of max memory"
+
+    - alert: CertificateExpiring
+      expr: (certmanager_certificate_expiration_timestamp_seconds - time()) < 86400 * 14
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: "SSL certificate expiring in {{ $value | humanizeDuration }}"
+        description: "Certificate for {{ $labels.name }} expires soon"
+
+    - alert: DiskSpaceLow
+      expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Low disk space ({{ $value | humanizePercentage }} free)"
+        description: "Disk on {{ $labels.node }} has < 10% free space"

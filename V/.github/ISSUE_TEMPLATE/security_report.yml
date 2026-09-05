@@ -1,0 +1,57 @@
+name: Security Vulnerability
+description: Report a security issue (DO NOT file publicly)
+title: "[security] "
+labels: [security]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **DO NOT** file this issue publicly if the vulnerability is sensitive.
+        Report critical vulnerabilities to **security@ninor.app** directly.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical (immediate fix required)
+        - High (fix in next release)
+        - Medium (fix in upcoming sprint)
+        - Low (fix when convenient)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+      placeholder: Describe the vulnerability and its impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      render: shell
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Vulnerability Type
+      options:
+        - SQL Injection
+        - XSS
+        - CSRF
+        - Authentication Bypass
+        - Authorization Bypass
+        - Data Exposure
+        - Rate Limiting
+        - Dependency Vulnerability
+        - Other
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential Impact
+      description: What data or functionality is at risk?

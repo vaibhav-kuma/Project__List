@@ -1,0 +1,54 @@
+{
+  "name": "video-chat-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:integration": "cd backend && npm run test:integration",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
+    "test:coverage": "npm run test:backend -- --coverage && npm run test:frontend -- --coverage",
+    "test:watch": "cd backend && npm run test:watch",
+    "test:ci": "npm run test:coverage && npm run test:integration",
+    "prepare": "husky",
+    "lint": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npx eslint src/",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
+    "typecheck": "cd backend && npx tsc --noEmit && cd ../frontend && npx tsc --noEmit",
+    "setup": "bash scripts/setup.sh",
+    "clean": "rm -rf backend/dist frontend/.next backend/coverage frontend/coverage node_modules",
+    "reset": "npm run clean && npm run install:all"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "prettier": "^3.2.0",
+    "sort-package-json": "^2.8.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yaml,yml}": ["prettier --write"],
+    "*.css": ["prettier --write"],
+    "*.prisma": ["prettier --write"],
+    "package.json": ["sort-package-json"]
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
