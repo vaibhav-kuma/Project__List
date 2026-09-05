@@ -1,0 +1,22 @@
+{
+  "name": "@ninor/web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "next": "^15.5.3",
+    "nsfwjs": "^4.2.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "socket.io-client": "^4.8.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "^5.9.2"
+  }
+}

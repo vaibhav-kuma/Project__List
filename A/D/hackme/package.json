@@ -1,0 +1,27 @@
+{
+  "name": "hackme",
+  "version": "1.0.0",
+  "description": "This repository stre the new tool of hacking",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/C1pt2r5/hackme.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/C1pt2r5/hackme/issues"
+  },
+  "homepage": "https://github.com/C1pt2r5/hackme#readme",
+  "dependencies": {
+    "jsonfile": "^6.2.0",
+    "moment": "^2.30.1",
+    "random": "^5.4.1",
+    "simple-git": "^3.33.0"
+  }
+}

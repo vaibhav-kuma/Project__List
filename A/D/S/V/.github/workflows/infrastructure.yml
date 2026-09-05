@@ -1,0 +1,83 @@
+name: Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        type: choice
+        options:
+          - staging
+          - production
+        required: true
+        default: staging
+      action:
+        description: 'Terraform action'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+        required: true
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_VERSION: '1.9.0'
+  TF_DIR: './terraform'
+
+jobs:
+  terraform:
+    name: 'Terraform ${{ inputs.action }} (${{ inputs.environment }})'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: Terraform-GitHubActions
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.TF_VAR_REDIS_PASSWORD }}
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: inputs.action == 'plan' || inputs.action == 'apply'
+        run: terraform plan -var-file="terraform.tfvars" -out=tfplan
+        env:
+          TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.TF_VAR_REDIS_PASSWORD }}
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply'
+        run: terraform apply tfplan
+
+      - name: Terraform Destroy
+        if: inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
+        env:
+          TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          TF_VAR_redis_password: ${{ secrets.TF_VAR_REDIS_PASSWORD }}

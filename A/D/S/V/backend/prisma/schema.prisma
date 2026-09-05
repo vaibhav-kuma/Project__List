@@ -1,0 +1,911 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  online
+  offline
+  away
+  banned
+}
+
+enum UserRole {
+  user
+  moderator
+  admin
+}
+
+enum Gender {
+  male
+  female
+  non_binary
+  other
+  prefer_not_to_say
+}
+
+enum SessionStatus {
+  connecting
+  active
+  extended
+  ended
+  reported
+  timeout
+}
+
+enum FriendStatus {
+  pending
+  accepted
+  blocked
+  removed
+}
+
+enum MomentType {
+  image
+  video
+  gif
+}
+
+enum ReportStatus {
+  pending
+  reviewing
+  resolved
+  dismissed
+  escalated
+}
+
+enum ReportReason {
+  inappropriate
+  harassment
+  spam
+  underage
+  hate_speech
+  violence
+  scam
+  other
+}
+
+enum ModerationActionType {
+  warning
+  temporary_ban
+  permanent_ban
+  shadow_ban
+  feature_restriction
+}
+
+enum SubscriptionPlan {
+  free
+  plus
+  pro
+  premium
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  expired
+  past_due
+  trialing
+  incomplete
+  incomplete_expired
+}
+
+enum SubscriptionProvider {
+  stripe
+  paypal
+  apple_pay
+  google_pay
+  manual
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+  expired
+}
+
+enum AgeVerificationMethod {
+  document_upload
+  id_verification_api
+  ml_estimation
+  parental_consent
+  credit_card
+}
+
+enum ParentalConsentStatus {
+  pending
+  approved
+  rejected
+  expired
+  revoked
+}
+
+enum DataExportStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum LegalDocumentType {
+  terms_of_service
+  privacy_policy
+  community_guidelines
+  cookie_policy
+  data_processing_agreement
+  parental_consent_form
+}
+
+enum SafetyEventType {
+  emergency_exit
+  suspicious_behavior_warning
+  location_spoofing_detected
+  safety_tip_shown
+  block_user
+  safety_check_triggered
+}
+
+enum NotificationType {
+  match
+  friend_request
+  friend_accepted
+  incoming_call
+  message
+  report_update
+  moderation_action
+  subscription
+  system
+}
+
+model User {
+  id                  String               @id @default(uuid()) @db.Uuid
+  email               String?              @unique
+  phone               String?              @unique
+  passwordHash        String               @map("password_hash") @db.VarChar(255)
+  displayName         String               @map("display_name") @db.VarChar(50)
+  age                 Int
+  gender              Gender
+  avatarUrl           String?              @map("avatar_url") @db.VarChar(500)
+  avatarPublicId      String?              @map("avatar_public_id") @db.VarChar(255)
+  bio                 String?              @db.Text
+  isVerified          Boolean              @default(false) @map("is_verified")
+  verificationStatus  VerificationStatus   @default(unverified) @map("verification_status")
+  verificationProvider String?             @map("verification_provider") @db.VarChar(50)
+  verificationDate    DateTime?            @map("verification_date") @db.Timestamp(3)
+  status              UserStatus           @default(offline)
+  role                UserRole             @default(user)
+  isPremium           Boolean              @default(false) @map("is_premium")
+  premiumTier         SubscriptionPlan     @default(free) @map("premium_tier")
+  premiumExpiresAt    DateTime?            @map("premium_expires_at") @db.Timestamp(3)
+  severityScore       Int                  @default(0) @map("severity_score")
+  isBanned            Boolean              @default(false) @map("is_banned")
+  banReason           String?              @map("ban_reason") @db.Text
+  banExpiresAt        DateTime?            @map("ban_expires_at") @db.Timestamp(3)
+  isShadowBanned      Boolean              @default(false) @map("is_shadow_banned")
+  twoFactorEnabled    Boolean              @default(false) @map("two_factor_enabled")
+  twoFactorSecret     String?              @map("two_factor_secret") @db.VarChar(255)
+  socialAccounts      String[]             @map("social_accounts") @default([])
+  parentalConsent     Boolean              @default(false) @map("parental_consent")
+  parentalConsentDate DateTime?            @map("parental_consent_date") @db.Timestamp(3)
+  parentEmail         String?              @map("parent_email") @db.VarChar(255)
+  ageVerified         Boolean              @default(false) @map("age_verified")
+  ageVerificationMethod AgeVerificationMethod? @map("age_verification_method")
+  ageVerificationDate DateTime?            @map("age_verification_date") @db.Timestamp(3)
+  estimatedAge        Int?                 @map("estimated_age")
+  isMinor             Boolean              @default(false) @map("is_minor")
+  restrictedMode      Boolean              @default(false) @map("restricted_mode")
+  privacyPolicyAccepted Boolean            @default(false) @map("privacy_policy_accepted")
+  privacyPolicyAcceptedAt DateTime?        @map("privacy_policy_accepted_at") @db.Timestamp(3)
+  termsAccepted       Boolean              @default(false) @map("terms_accepted")
+  termsAcceptedAt     DateTime?            @map("terms_accepted_at") @db.Timestamp(3)
+  cookieConsent       Boolean              @default(false) @map("cookie_consent")
+  cookieConsentAt     DateTime?            @map("cookie_consent_at") @db.Timestamp(3)
+  marketingConsent    Boolean              @default(false) @map("marketing_consent")
+  dataProcessingConsent Boolean            @default(false) @map("data_processing_consent")
+  accountDeletionRequested Boolean         @default(false) @map("account_deletion_requested")
+  accountDeletionRequestedAt DateTime?     @map("account_deletion_requested_at") @db.Timestamp(3)
+  accountDeletedAt    DateTime?            @map("account_deleted_at") @db.Timestamp(3)
+  deletionReason      String?              @map("deletion_reason") @db.Text
+  lastSafetyTipShown  DateTime?            @map("last_safety_tip_shown") @db.Timestamp(3)
+  emergencyExitCount  Int                  @default(0) @map("emergency_exit_count")
+  locationSpoofingDetected Boolean         @default(false) @map("location_spoofing_detected")
+  suspiciousBehaviorWarnings Int           @default(0) @map("suspicious_behavior_warnings")
+  totalSessions       Int                  @default(0) @map("total_sessions")
+  totalFriends        Int                  @default(0) @map("total_friends")
+  totalReportsReceived Int                 @default(0) @map("total_reports_received")
+  lastActiveAt        DateTime             @default(now()) @map("last_active_at") @db.Timestamp(3)
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt           DateTime             @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+  deletedAt           DateTime?            @map("deleted_at") @db.Timestamp(3)
+
+  preferences         UserPreferences?
+  profile             UserProfile?
+  sessionsAsUser1     VideoSession[]       @relation("User1Sessions")
+  sessionsAsUser2     VideoSession[]       @relation("User2Sessions")
+  friendsAsUser1      Friend[]             @relation("FriendUser1")
+  friendsAsUser2      Friend[]             @relation("FriendUser2")
+  moments             Moment[]
+  reportsMade         Report[]             @relation("ReportMaker")
+  reportsReceived     Report[]             @relation("ReportTarget")
+  moderationActions   ModerationAction[]
+  subscriptions       Subscription[]
+  matchHistoryAsUser  MatchHistory[]       @relation("MatchHistoryUser")
+  matchHistoryPartner MatchHistory[]       @relation("MatchHistoryPartner")
+  blockedUsers        BlockedUser[]        @relation("Blocker")
+  blockedBy           BlockedUser[]        @relation("Blocked")
+  notifications       Notification[]
+  analyticsEvents     AnalyticsEvent[]
+  ageVerifications    AgeVerification[]
+  parentalConsents    ParentalConsent[]
+  dataExports         DataExport[]
+  paymentHistory      PaymentHistory[]
+  momentViews         MomentView[]
+  momentLikes         MomentLike[]
+  momentReplies       MomentReply[]
+  safetyEvents        SafetyEvent[]
+  consentLogs         UserConsentLog[]
+  deletionLogs        AccountDeletionLog[]
+  cookieConsents      CookieConsent[]
+
+  @@map("users")
+  @@index([status, age])
+  @@index([gender, age])
+  @@index([isPremium, premiumExpiresAt])
+  @@index([severityScore])
+  @@index([isBanned, banExpiresAt])
+  @@index([lastActiveAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+model UserPreferences {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @map("user_id") @db.Uuid
+  preferredGenders Gender[] @map("preferred_genders")
+  ageRangeMin     Int      @default(18) @map("age_range_min")
+  ageRangeMax     Int      @default(120) @map("age_range_max")
+  languages       String[] @default(["en"])
+  countries       String[] @default([])
+  distanceKm      Int?     @map("distance_km")
+  interestTags    String[] @map("interest_tags") @default([])
+  showAge         Boolean  @default(true) @map("show_age")
+  showGender      Boolean  @default(true) @map("show_gender")
+  showLocation    Boolean  @default(false) @map("show_location")
+  allowMessagesFrom String @default("friends") @map("allow_messages_from") @db.VarChar(20)
+  pushNotifications Boolean @default(true) @map("push_notifications")
+  emailNotifications Boolean @default(true) @map("email_notifications")
+  matchNotifications Boolean @default(true) @map("match_notifications")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model UserProfile {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @map("user_id") @db.Uuid
+  instagramHandle String?  @map("instagram_handle") @db.VarChar(100)
+  tiktokHandle    String?  @map("tiktok_handle") @db.VarChar(100)
+  snapchatHandle  String?  @map("snapchat_handle") @db.VarChar(100)
+  interests       String[] @default([])
+  zodiacSign      String?  @map("zodiac_sign") @db.VarChar(20)
+  occupation      String?  @db.VarChar(100)
+  company         String?  @db.VarChar(100)
+  school          String?  @db.VarChar(100)
+  city            String?  @db.VarChar(100)
+  country         String?  @db.VarChar(2)
+  timezone        String   @default("UTC") @db.VarChar(50)
+  deviceType      String?  @map("device_type") @db.VarChar(20)
+  appVersion      String?  @map("app_version") @db.VarChar(20)
+  lastIp          String?  @map("last_ip") @db.VarChar(45)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model VideoSession {
+  id                String        @id @default(uuid()) @db.Uuid
+  user1Id           String        @map("user1_id") @db.Uuid
+  user2Id           String        @map("user2_id") @db.Uuid
+  status            SessionStatus @default(connecting)
+  startedAt         DateTime      @default(now()) @map("started_at") @db.Timestamp(3)
+  endedAt           DateTime?     @map("ended_at") @db.Timestamp(3)
+  durationSeconds   Int           @default(0) @map("duration_seconds")
+  extended          Boolean       @default(false)
+  extendCount       Int           @default(0) @map("extend_count")
+  maxDurationSeconds Int          @default(15) @map("max_duration_seconds")
+  extendedByUser1   Boolean       @default(false) @map("extended_by_user1")
+  extendedByUser2   Boolean       @default(false) @map("extended_by_user2")
+  videoQuality      String?       @map("video_quality") @db.VarChar(20)
+  avgBitrate        Int?          @map("avg_bitrate")
+  packetLossPercent Decimal?      @map("packet_loss_percent") @db.Decimal(5, 2)
+  connectionType    String?       @map("connection_type") @db.VarChar(20)
+  wasReported       Boolean       @default(false) @map("was_reported")
+  reportedBy        String?       @map("reported_by") @db.Uuid
+  reportReason      ReportReason? @map("report_reason")
+  moderationScore   Decimal?      @map("moderation_score") @db.Decimal(3, 2)
+  flaggedContent    Boolean       @default(false) @map("flagged_content")
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user1             User          @relation("User1Sessions", fields: [user1Id], references: [id])
+  user2             User          @relation("User2Sessions", fields: [user2Id], references: [id])
+
+  @@map("video_sessions")
+  @@index([status])
+  @@index([user1Id, startedAt(sort: Desc)])
+  @@index([user2Id, startedAt(sort: Desc)])
+  @@index([wasReported])
+  @@index([moderationScore(sort: Desc)])
+  @@index([startedAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+model MatchHistory {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  matchedWith     String   @map("matched_with") @db.Uuid
+  sessionId       String?  @map("session_id") @db.Uuid
+  matchedAt       DateTime @default(now()) @map("matched_at") @db.Timestamp(3)
+  waitTimeSeconds Int?     @map("wait_time_seconds")
+  matchType       String   @default("random") @map("match_type") @db.VarChar(20)
+  connected       Boolean  @default(false)
+  durationSeconds Int      @default(0) @map("duration_seconds")
+  extended        Boolean  @default(false)
+  addedAsFriend   Boolean  @default(false) @map("added_as_friend")
+  cooldownUntil   DateTime? @map("cooldown_until") @db.Timestamp(3)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user            User     @relation("MatchHistoryUser", fields: [userId], references: [id])
+  partner         User     @relation("MatchHistoryPartner", fields: [matchedWith], references: [id])
+
+  @@map("match_history")
+  @@index([userId, matchedWith, cooldownUntil])
+  @@index([userId, matchedAt(sort: Desc)])
+  @@index([matchedWith, matchedAt(sort: Desc)])
+  @@index([sessionId])
+}
+
+model Friend {
+  id          String     @id @default(uuid()) @db.Uuid
+  user1Id     String     @map("user1_id") @db.Uuid
+  user2Id     String     @map("user2_id") @db.Uuid
+  status      FriendStatus @default(pending)
+  requestedBy String?    @map("requested_by") @db.Uuid
+  acceptedAt  DateTime?  @map("accepted_at") @db.Timestamp(3)
+  lastChatAt  DateTime?  @map("last_chat_at") @db.Timestamp(3)
+  chatCount   Int        @default(0) @map("chat_count")
+  isMuted     Boolean    @default(false) @map("is_muted")
+  isFavorite  Boolean    @default(false) @map("is_favorite")
+  notes       String?    @db.Text
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt   DateTime   @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user1       User       @relation("FriendUser1", fields: [user1Id], references: [id])
+  user2       User       @relation("FriendUser2", fields: [user2Id], references: [id])
+
+  @@unique([user1Id, user2Id])
+  @@map("friends")
+  @@index([user1Id, status])
+  @@index([user2Id, status])
+  @@index([lastChatAt(sort: Desc)])
+}
+
+model BlockedUser {
+  id        String   @id @default(uuid()) @db.Uuid
+  blockerId String   @map("blocker_id") @db.Uuid
+  blockedId String   @map("blocked_id") @db.Uuid
+  reason    String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id])
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id])
+
+  @@unique([blockerId, blockedId])
+  @@map("blocked_users")
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+model BanList {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  deviceId    String?  @map("device_id") @db.VarChar(255)
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  banType     String   @map("ban_type") @db.VarChar(20)
+  reason      String   @db.Text
+  severity    Int
+  bannedBy    String?  @map("banned_by") @db.Uuid
+  expiresAt   DateTime? @map("expires_at") @db.Timestamp(3)
+  appealStatus String  @default("none") @map("appeal_status") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  @@map("ban_list")
+  @@index([userId])
+  @@index([deviceId])
+  @@index([ipAddress])
+}
+
+model Moment {
+  id              String     @id @default(uuid()) @db.Uuid
+  userId          String     @map("user_id") @db.Uuid
+  mediaUrl        String     @map("media_url") @db.VarChar(500)
+  mediaPublicId   String     @map("media_public_id") @db.VarChar(255)
+  mediaType       MomentType @map("media_type")
+  thumbnailUrl    String?    @map("thumbnail_url") @db.VarChar(500)
+  caption         String?    @db.Text
+  durationSeconds Int?       @map("duration_seconds")
+  width           Int?
+  height          Int?
+  fileSize        Int?       @map("file_size")
+  viewCount       Int        @default(0) @map("view_count")
+  likeCount       Int        @default(0) @map("like_count")
+  replyCount      Int        @default(0) @map("reply_count")
+  moderationStatus String    @default("pending") @map("moderation_status") @db.VarChar(20)
+  moderationScore Decimal?   @map("moderation_score") @db.Decimal(3, 2)
+  visibility      String     @default("friends") @db.VarChar(20)
+  filters         String[]   @default([])
+  stickers        Json?
+  expiresAt       DateTime   @map("expires_at") @db.Timestamp(3)
+  isExpired       Boolean    @default(false) @map("is_expired")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  views           MomentView[]
+  likes           MomentLike[]
+  replies         MomentReply[]
+
+  @@map("moments")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([expiresAt])
+  @@index([moderationStatus])
+  @@index([visibility])
+  @@index([isExpired])
+  @@index([viewCount(sort: Desc), createdAt(sort: Desc)])
+}
+
+model MomentView {
+  id        String   @id @default(uuid()) @db.Uuid
+  momentId  String   @map("moment_id") @db.Uuid
+  viewerId  String   @map("viewer_id") @db.Uuid
+  viewedAt  DateTime @default(now()) @map("viewed_at") @db.Timestamp(3)
+
+  moment    Moment   @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  viewer    User     @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+
+  @@unique([momentId, viewerId])
+  @@map("moment_views")
+  @@index([momentId])
+  @@index([viewerId, viewedAt(sort: Desc)])
+}
+
+model MomentLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  momentId  String   @map("moment_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  moment    Moment   @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([momentId, userId])
+  @@map("moment_likes")
+  @@index([momentId])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model MomentReply {
+  id        String   @id @default(uuid()) @db.Uuid
+  momentId  String   @map("moment_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp(3)
+
+  moment    Moment   @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("moment_replies")
+  @@index([momentId, createdAt(sort: Desc)])
+}
+
+model Report {
+  id              String        @id @default(uuid()) @db.Uuid
+  reporterId      String        @map("reporter_id") @db.Uuid
+  reportedUserId  String        @map("reported_user_id") @db.Uuid
+  sessionId       String?       @map("session_id") @db.Uuid
+  momentId        String?       @map("moment_id") @db.Uuid
+  reason          ReportReason
+  description     String?       @db.Text
+  status          ReportStatus  @default(pending)
+  evidenceUrls    String[]      @map("evidence_urls")
+  screenshotUrl   String?       @map("screenshot_url") @db.VarChar(500)
+  severity        Int           @default(1)
+  priority        Int           @default(0)
+  assignedTo      String?       @map("assigned_to") @db.Uuid
+  resolutionNotes String?       @map("resolution_notes") @db.Text
+  resolvedAt      DateTime?     @map("resolved_at") @db.Timestamp(3)
+  resolvedBy      String?       @map("resolved_by") @db.Uuid
+  actionTaken     ModerationActionType? @map("action_taken")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamp(3)
+
+  reporter        User          @relation("ReportMaker", fields: [reporterId], references: [id])
+  reportedUser    User          @relation("ReportTarget", fields: [reportedUserId], references: [id])
+
+  @@map("reports")
+  @@index([status, priority(sort: Desc)])
+  @@index([assignedTo, status])
+  @@index([severity(sort: Desc), createdAt])
+  @@index([reporterId, createdAt(sort: Desc)])
+  @@index([reportedUserId, createdAt(sort: Desc)])
+  @@index([sessionId])
+  @@index([momentId])
+}
+
+model ModerationAction {
+  id            String               @id @default(uuid()) @db.Uuid
+  userId        String               @map("user_id") @db.Uuid
+  reportId      String?              @map("report_id") @db.Uuid
+  actionType    ModerationActionType @map("action_type")
+  reason        String               @db.Text
+  details       Json?
+  durationHours Int?                 @map("duration_hours")
+  expiresAt     DateTime?            @map("expires_at") @db.Timestamp(3)
+  moderatorId   String?              @map("moderator_id") @db.Uuid
+  isAuto        Boolean              @default(false) @map("is_auto")
+  appealStatus  String               @default("none") @map("appeal_status") @db.VarChar(20)
+  appealNotes   String?              @map("appeal_notes") @db.Text
+  createdAt     DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("moderation_actions")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([expiresAt])
+  @@index([isAuto])
+}
+
+model ModerationLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String   @db.VarChar(50)
+  details   Json?
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  @@map("moderation_logs")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action, createdAt(sort: Desc)])
+}
+
+model Subscription {
+  id                     String             @id @default(uuid()) @db.Uuid
+  userId                 String             @map("user_id") @db.Uuid
+  plan                   SubscriptionPlan
+  status                 SubscriptionStatus @default(active)
+  provider               SubscriptionProvider
+  providerSubscriptionId String             @map("provider_subscription_id") @db.VarChar(255)
+  providerCustomerId     String?            @map("provider_customer_id") @db.VarChar(255)
+  providerPaymentMethodId String?           @map("provider_payment_method_id") @db.VarChar(255)
+  amount                 Decimal            @db.Decimal(10, 2)
+  currency               String             @default("USD") @db.VarChar(3)
+  interval               String             @db.VarChar(20)
+  trialEndsAt            DateTime?          @map("trial_ends_at") @db.Timestamp(3)
+  trialUsed              Boolean            @default(false) @map("trial_used")
+  currentPeriodStart     DateTime           @map("current_period_start") @db.Timestamp(3)
+  currentPeriodEnd       DateTime           @map("current_period_end") @db.Timestamp(3)
+  cancelAtPeriodEnd      Boolean            @default(false) @map("cancel_at_period_end")
+  cancelledAt            DateTime?          @map("cancelled_at") @db.Timestamp(3)
+  cancellationReason     String?            @map("cancellation_reason") @db.VarChar(200)
+  autoRenew              Boolean            @default(true) @map("auto_renew")
+  lastBillingDate        DateTime?          @map("last_billing_date") @db.Timestamp(3)
+  nextBillingDate        DateTime?          @map("next_billing_date") @db.Timestamp(3)
+  failedPaymentCount     Int                @default(0) @map("failed_payment_count")
+  metadata               Json?
+  createdAt              DateTime           @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt              DateTime           @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentHistory         PaymentHistory[]
+
+  @@map("subscriptions")
+  @@index([userId, status])
+  @@index([currentPeriodEnd])
+  @@index([provider, providerSubscriptionId])
+  @@index([trialEndsAt])
+  @@index([autoRenew, status])
+}
+
+model SubscriptionFeature {
+  id                    String   @id @default(uuid()) @db.Uuid
+  plan                  SubscriptionPlan @unique
+  unlimitedExtends      Boolean  @default(false) @map("unlimited_extends")
+  genderFilter          Boolean  @default(false) @map("gender_filter")
+  locationFilter        Boolean  @default(false) @map("location_filter")
+  advancedFilters       Boolean  @default(false) @map("advanced_filters")
+  priorityMatching      Boolean  @default(false) @map("priority_matching")
+  rewindFeature         Boolean  @default(false) @map("rewind_feature")
+  unlimitedRewinds      Boolean  @default(false) @map("unlimited_rewinds")
+  seeWhoLikedYou        Boolean  @default(false) @map("see_who_liked_you")
+  seeWhoAddedAsFriend   Boolean  @default(false) @map("see_who_added_as_friend")
+  adFree                Boolean  @default(false) @map("ad_free")
+  videoFilters          Boolean  @default(false) @map("video_filters")
+  exclusiveFilters      Boolean  @default(false) @map("exclusive_filters")
+  exclusiveStickers     Boolean  @default(false) @map("exclusive_stickers")
+  hdVideo               Boolean  @default(false) @map("hd_video")
+  readReceipts          Boolean  @default(false) @map("read_receipts")
+  profileBoostsPerMonth Int      @default(0) @map("profile_boosts_per_month")
+  maxDailyMatches       Int      @default(10) @map("max_daily_matches")
+  incognitoMode         Boolean  @default(false) @map("incognito_mode")
+  passportFeature       Boolean  @default(false) @map("passport_feature")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt             DateTime @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  @@map("subscription_features")
+}
+
+model PaymentHistory {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  subscriptionId    String?  @map("subscription_id") @db.Uuid
+  amount            Decimal  @db.Decimal(10, 2)
+  currency          String   @default("USD") @db.VarChar(3)
+  status            String   @db.VarChar(20)
+  provider          String   @db.VarChar(20)
+  providerPaymentId String?  @map("provider_payment_id") @db.VarChar(255)
+  providerInvoiceId String?  @map("provider_invoice_id") @db.VarChar(255)
+  failureReason     String?  @map("failure_reason") @db.VarChar(200)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription      Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payment_history")
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model Notification {
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @map("user_id") @db.Uuid
+  type        NotificationType
+  title       String           @db.VarChar(200)
+  message     String?          @db.Text
+  targetType  String?          @map("target_type") @db.VarChar(50)
+  targetId    String?          @map("target_id") @db.Uuid
+  isRead      Boolean          @default(false) @map("is_read")
+  readAt      DateTime?        @map("read_at") @db.Timestamp(3)
+  deliveredVia String[]        @default(["in_app"]) @map("delivered_via")
+  pushSent    Boolean          @default(false) @map("push_sent")
+  emailSent   Boolean          @default(false) @map("email_sent")
+  expiresAt   DateTime?        @map("expires_at") @db.Timestamp(3)
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type, createdAt(sort: Desc)])
+  @@index([expiresAt])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  sessionId  String?  @map("session_id") @db.Uuid
+  eventType  String   @map("event_type") @db.VarChar(50)
+  eventData  Json?    @map("event_data")
+  deviceType String?  @map("device_type") @db.VarChar(20)
+  platform   String?  @db.VarChar(20)
+  appVersion String?  @map("app_version") @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("analytics_events")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@index([sessionId])
+}
+
+model RateLimit {
+  id          String   @id @default(uuid()) @db.Uuid
+  identifier  String   @db.VarChar(255)
+  action      String   @db.VarChar(50)
+  count       Int      @default(1)
+  windowStart DateTime @default(now()) @map("window_start") @db.Timestamp(3)
+  windowEnd   DateTime @map("window_end") @db.Timestamp(3)
+
+  @@unique([identifier, action, windowStart])
+  @@map("rate_limits")
+  @@index([identifier, action, windowStart])
+}
+
+model AgeVerification {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @map("user_id") @db.Uuid
+  method              AgeVerificationMethod
+  status              VerificationStatus   @default(pending)
+  documentType        String?              @map("document_type") @db.VarChar(50)
+  documentUrl         String?              @map("document_url") @db.VarChar(500)
+  documentPublicId    String?              @map("document_public_id") @db.VarChar(255)
+  idVerificationId    String?              @map("id_verification_id") @db.VarChar(255)
+  idVerificationProvider String?           @map("id_verification_provider") @db.VarChar(50)
+  estimatedAge        Int?                 @map("estimated_age")
+  estimatedAgeConfidence Decimal?          @map("estimated_age_confidence") @db.Decimal(3, 2)
+  verifiedAge         Int?                 @map("verified_age")
+  rejectionReason     String?              @map("rejection_reason") @db.Text
+  reviewerId          String?              @map("reviewer_id") @db.Uuid
+  reviewedAt          DateTime?            @map("reviewed_at") @db.Timestamp(3)
+  expiresAt           DateTime?            @map("expires_at") @db.Timestamp(3)
+  metadata            Json?
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt           DateTime             @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("age_verifications")
+  @@index([userId, status])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([method, status])
+}
+
+model ParentalConsent {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @map("user_id") @db.Uuid
+  parentEmail         String               @map("parent_email") @db.VarChar(255)
+  parentName          String               @map("parent_name") @db.VarChar(100)
+  status              ParentalConsentStatus @default(pending)
+  consentToken        String               @unique @map("consent_token") @db.VarChar(255)
+  consentFormUrl      String?              @map("consent_form_url") @db.VarChar(500)
+  consentFormSigned   Boolean              @default(false) @map("consent_form_signed")
+  consentGivenAt      DateTime?            @map("consent_given_at") @db.Timestamp(3)
+  consentRevokedAt    DateTime?            @map("consent_revoked_at") @db.Timestamp(3)
+  consentExpiresAt    DateTime?            @map("consent_expires_at") @db.Timestamp(3)
+  restrictions        Json?
+  metadata            Json?
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt           DateTime             @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("parental_consents")
+  @@index([userId, status])
+  @@index([parentEmail, status])
+  @@index([consentToken])
+}
+
+model DataExport {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @map("user_id") @db.Uuid
+  status              DataExportStatus     @default(pending)
+  requestedAt         DateTime             @default(now()) @map("requested_at") @db.Timestamp(3)
+  completedAt         DateTime?            @map("completed_at") @db.Timestamp(3)
+  exportUrl           String?              @map("export_url") @db.VarChar(500)
+  exportPublicId      String?              @map("export_public_id") @db.VarChar(255)
+  exportSize          Int?                 @map("export_size")
+  expiresAt           DateTime?            @map("expires_at") @db.Timestamp(3)
+  format              String               @default("json") @db.VarChar(10)
+  includeMessages     Boolean              @default(true) @map("include_messages")
+  includeMoments      Boolean              @default(true) @map("include_moments")
+  includeFriends      Boolean              @default(true) @map("include_friends")
+  includeReports      Boolean              @default(false) @map("include_reports")
+  includePayments     Boolean              @default(false) @map("include_payments")
+  failureReason       String?              @map("failure_reason") @db.Text
+  metadata            Json?
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("data_exports")
+  @@index([userId, status])
+  @@index([status, requestedAt(sort: Desc)])
+}
+
+model SafetyEvent {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String?              @map("user_id") @db.Uuid
+  sessionId           String?              @map("session_id") @db.Uuid
+  eventType           SafetyEventType      @map("event_type")
+  severity            Int                  @default(1)
+  description         String?              @db.Text
+  location            String?              @db.VarChar(100)
+  deviceInfo          Json?
+  ipAddress           String?              @map("ip_address") @db.VarChar(45)
+  userAgent           String?              @map("user_agent") @db.Text
+  metadata            Json?
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user                User?                @relation(fields: [userId], references: [id])
+
+  @@map("safety_events")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@index([sessionId])
+  @@index([severity(sort: Desc), createdAt])
+}
+
+model LegalDocument {
+  id                  String               @id @default(uuid()) @db.Uuid
+  documentType        LegalDocumentType    @map("document_type")
+  version             String               @db.VarChar(20)
+  title               String               @db.VarChar(200)
+  content             String               @db.Text
+  language            String               @default("en") @db.VarChar(10)
+  isActive            Boolean              @default(false) @map("is_active")
+  effectiveDate       DateTime             @map("effective_date") @db.Timestamp(3)
+  supersededById      String?              @map("superseded_by_id") @db.Uuid
+  metadata            Json?
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt           DateTime             @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  @@unique([documentType, version, language])
+  @@map("legal_documents")
+  @@index([documentType, isActive])
+  @@index([effectiveDate(sort: Desc)])
+}
+
+model UserConsentLog {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @map("user_id") @db.Uuid
+  documentType        LegalDocumentType    @map("document_type")
+  documentVersion     String               @map("document_version") @db.VarChar(20)
+  consentGiven        Boolean              @default(true) @map("consent_given")
+  ipAddress           String?              @map("ip_address") @db.VarChar(45)
+  userAgent           String?              @map("user_agent") @db.Text
+  metadata            Json?
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_consent_logs")
+  @@index([userId, documentType, createdAt(sort: Desc)])
+  @@index([documentType, documentVersion])
+}
+
+model AccountDeletionLog {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @map("user_id") @db.Uuid
+  reason              String?              @db.Text
+  requestedAt         DateTime             @default(now()) @map("requested_at") @db.Timestamp(3)
+  processedAt         DateTime?            @map("processed_at") @db.Timestamp(3)
+  status              String               @default("pending") @db.VarChar(20)
+  dataRetained        Json?
+  deletionMethod      String               @default("soft") @map("deletion_method") @db.VarChar(20)
+  processedBy         String?              @map("processed_by") @db.Uuid
+  notes               String?              @db.Text
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_logs")
+  @@index([userId, status])
+  @@index([status, requestedAt(sort: Desc)])
+}
+
+model CookieConsent {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String?              @map("user_id") @db.Uuid
+  sessionId           String               @unique @map("session_id") @db.VarChar(255)
+  necessary           Boolean              @default(true)
+  functional          Boolean              @default(false)
+  analytics           Boolean              @default(false)
+  marketing           Boolean              @default(false)
+  ipAddress           String?              @map("ip_address") @db.VarChar(45)
+  userAgent           String?              @map("user_agent") @db.Text
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamp(3)
+  updatedAt           DateTime             @default(now()) @map("updated_at") @db.Timestamp(3) @updatedAt
+
+  user                User?                @relation(fields: [userId], references: [id])
+
+  @@map("cookie_consents")
+  @@index([userId])
+  @@index([sessionId])
+}
