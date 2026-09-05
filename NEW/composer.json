@@ -1,0 +1,141 @@
+{
+    "name": "securescout/pro",
+    "description": "SecureScout Pro - Professional Attack Surface Monitoring and External Threat Intelligence Platform",
+    "type": "project",
+    "keywords": ["security", "penetration-testing", "osint", "threat-intelligence", "attack-surface"],
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^11.0",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.9",
+        "guzzlehttp/guzzle": "^7.8",
+        "nesbot/carbon": "^2.71",
+        "vlucas/phpdotenv": "^5.6",
+        "ramsey/uuid": "^4.7",
+        "doctrine/dbal": "^4.0",
+        "intervention/image": "^3.0",
+        "barryvdh/laravel-dompdf": "^2.2",
+        "pusher/pusher-php-server": "^7.2",
+        "symfony/process": "^7.0",
+        "symfony/dom-crawler": "^7.0",
+        "symfony/css-selector": "^7.0",
+        "lcobucci/jwt": "^5.0",
+        "phpseclib/phpseclib": "^3.0"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "laravel/pint": "^1.13",
+        "laravel/sail": "^1.26",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "phpunit/phpunit": "^11.0",
+        "spatie/laravel-ignition": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "app/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "@php artisan migrate --graceful --ansi"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c084fc,#fb7185\" \"npm run dev\" \"php artisan serve\""
+        ],
+        "build": [
+            "@php artisan config:cache",
+            "@php artisan route:cache",
+            "@php artisan view:cache",
+            "@php artisan event:cache"
+        ],
+        "clear": [
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear",
+            "@php artisan cache:clear",
+            "@php artisan event:clear"
+        ],
+        "fresh": [
+            "@php artisan migrate:fresh --seed",
+            "@php artisan storage:link"
+        ],
+        "test": [
+            "@php artisan test --parallel"
+        ],
+        "test-coverage": [
+            "XDEBUG_MODE=coverage @php artisan test --coverage --min=80"
+        ],
+        "analyze": [
+            "phpstan analyse",
+            "php-cs-fixer fix --dry-run --diff",
+            "phpmd app,tests text cleancode,codesize,controversial,design,naming,unusedcode"
+        ],
+        "fix": [
+            "php-cs-fixer fix",
+            "@php artisan pint"
+        ],
+        "security-check": [
+            "composer audit"
+        ],
+        "backup": [
+            "@php artisan backup:run --only-db"
+        ],
+        "deploy": [
+            "@php artisan down --render=errors::503",
+            "@php artisan migrate --force",
+            "@php artisan config:cache",
+            "@php artisan route:cache",
+            "@php artisan view:cache",
+            "@php artisan up"
+        ],
+        "production-setup": [
+            "@php artisan optimize",
+            "@php artisan migrate --force",
+            "@php artisan storage:link",
+            "@php artisan config:cache",
+            "@php artisan route:cache",
+            "@php artisan view:cache"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
