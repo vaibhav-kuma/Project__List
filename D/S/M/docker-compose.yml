@@ -1,0 +1,203 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: dealscout-postgres
+    environment:
+      POSTGRES_DB: dealscout
+      POSTGRES_USER: dealscout
+      POSTGRES_PASSWORD: dealscout123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dealscout -d dealscout"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dealscout-network
+
+  # Redis for Bull Queue
+  redis:
+    image: redis:7-alpine
+    container_name: dealscout-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dealscout-network
+
+  # Main Application Server
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: dealscout-app
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://dealscout:dealscout123@postgres:5432/dealscout
+      REDIS_URL: redis://redis:6379
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: dealscout
+      DB_USER: dealscout
+      DB_PASSWORD: dealscout123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TINYFISH_API_KEY: ${TINYFISH_API_KEY:-your_api_key_here}
+      TINYFISH_BASE_URL: ${TINYFISH_BASE_URL:-https://api.tinyfish.com/v1}
+      JWT_SECRET: ${JWT_SECRET:-change_in_production}
+      SESSION_SECRET: ${SESSION_SECRET:-change_in_production}
+      RATE_LIMIT_WINDOW_MS: 3600000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      DAILY_API_BUDGET: 1000
+      API_COST_PER_CALL: 0.01
+      LOG_LEVEL: info
+      MAX_CONCURRENT_JOBS: 3
+      SESSION_TIMEOUT_MS: 1800000
+      SCREENSHOT_INTERVAL_MS: 500
+      MAX_RETRY_ATTEMPTS: 3
+    ports:
+      - "3001:3001"
+    volumes:
+      - app_logs:/app/logs
+      - app_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - dealscout-network
+
+  # Worker Process
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: dealscout-worker
+    command: ["node", "src/worker.js"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://dealscout:dealscout123@postgres:5432/dealscout
+      REDIS_URL: redis://redis:6379
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: dealscout
+      DB_USER: dealscout
+      DB_PASSWORD: dealscout123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TINYFISH_API_KEY: ${TINYFISH_API_KEY:-your_api_key_here}
+      TINYFISH_BASE_URL: ${TINYFISH_BASE_URL:-https://api.tinyfish.com/v1}
+      LOG_LEVEL: info
+      MAX_CONCURRENT_JOBS: 3
+      SESSION_TIMEOUT_MS: 1800000
+      MAX_RETRY_ATTEMPTS: 3
+    volumes:
+      - worker_logs:/app/logs
+      - worker_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - dealscout-network
+
+  # Prometheus for Metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dealscout-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - dealscout-network
+
+  # Grafana for Visualization (Optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dealscout-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - dealscout-network
+
+  # Nginx Reverse Proxy (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: dealscout-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - dealscout-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_logs:
+    driver: local
+  app_data:
+    driver: local
+  worker_logs:
+    driver: local
+  worker_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  dealscout-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

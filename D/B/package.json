@@ -1,0 +1,25 @@
+{
+  "name": "ninor-videochat",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/api & npm run dev -w apps/web",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run prisma:migrate -w apps/api",
+    "prisma:generate": "npm run prisma:generate -w apps/api"
+  },
+  "dependencies": {
+    "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/multer": "^2.1.0",
+    "@types/qrcode": "^1.5.6"
+  }
+}

@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ninor-backend-pdb
+  namespace: ninor
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: ninor-backend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ninor-frontend-pdb
+  namespace: ninor
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ninor-frontend

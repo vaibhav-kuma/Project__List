@@ -1,0 +1,24 @@
+# Terraform variables for Ninor Production
+# Copy to terraform.tfvars and fill in sensitive values
+
+environment       = "production"
+aws_region        = "us-east-1"
+
+# Database
+db_password       = "your-strong-random-password-here"
+db_instance_class = "db.t4g.medium"
+
+# Redis
+redis_password    = "your-redis-auth-token-here"
+redis_node_type   = "cache.t4g.small"
+
+# Domains (update DNS at your registrar first)
+domain_name       = "ninor.app"
+api_domain_name   = "api.ninor.app"
+ws_domain_name    = "ws.ninor.app"
+
+# EKS
+eks_node_instance_types = ["t3.large", "t3.xlarge"]
+eks_desired_size        = 3
+eks_max_size           = 10
+eks_min_size           = 2
