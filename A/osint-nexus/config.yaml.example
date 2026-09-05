@@ -1,0 +1,68 @@
+# OSINT NEXUS Configuration Template
+# Copy this to config.yaml and add your API keys
+
+general:
+  project_name: "OSINT Nexus"
+  version: "2.0.0"
+  max_threads: 20
+  async_workers: 50
+  request_timeout: 30
+  retry_attempts: 3
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  output_dir: "./reports"
+  database: "sqlite:///database/osint_nexus.db"
+
+api_keys:
+  shodan: ""
+  censys_id: ""
+  censys_secret: ""
+  virustotal: ""
+  hunter_io: ""
+  haveibeenpwned: ""
+  emailrep: ""
+  numverify: ""
+  ipinfo: ""
+  abuseipdb: ""
+  greynoise: ""
+  urlscan: ""
+  alienvault_otx: ""
+  google_cse_key: ""
+  google_cse_cx: ""
+  twitter_bearer: ""
+  github_token: ""
+
+proxy:
+  enabled: false
+  type: "tor"
+  host: "127.0.0.1"
+  port: 9050
+
+rate_limits:
+  default: 30
+  shodan: 10
+  virustotal: 4
+
+modules:
+  domain:
+    whois: true
+    dns_enum: true
+    subdomain_enum: true
+    ssl_cert: true
+    wayback: true
+  email:
+    hibp: true
+    hunter: true
+    emailrep: true
+    validator: true
+  ip:
+    shodan: true
+    censys: true
+    geoip: true
+    abuseipdb: true
+    reverse_dns: true
+
+logging:
+  level: "INFO"
+  file: "logs/osint_nexus.log"
+  max_size_mb: 50
+  backup_count: 5

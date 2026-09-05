@@ -1,0 +1,380 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: Lint backend
+        run: cd backend && npx eslint src/
+
+      - name: Lint frontend
+        run: cd frontend && npm run lint
+
+  type-check:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend && npm ci
+          cd ../backend && npx prisma generate
+
+      - name: Type-check backend
+        run: cd backend && npx tsc --noEmit
+
+      - name: Type-check frontend
+        run: cd frontend && npx tsc --noEmit
+
+  unit-tests:
+    name: Unit Tests
+    needs: [lint, type-check]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ninor_test
+          POSTGRES_USER: ninor
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+
+      - name: Run backend unit tests
+        run: cd backend && npm test -- --testPathPattern='src/__tests__/(?!integration)'
+        env:
+          DATABASE_URL: postgresql://ninor:test@localhost:5432/ninor_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+
+      - name: Run frontend unit tests
+        run: cd frontend && npm test -- --coverage
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            backend/coverage/
+            frontend/coverage/
+
+  integration-tests:
+    name: Integration Tests
+    needs: [unit-tests]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ninor_test
+          POSTGRES_USER: ninor
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+
+      - name: Run integration tests
+        run: cd backend && npm run test:integration
+        env:
+          DATABASE_URL: postgresql://ninor:test@localhost:5432/ninor_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+          NODE_ENV: test
+
+  e2e-tests:
+    name: E2E Tests
+    needs: [integration-tests]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ninor_test
+          POSTGRES_USER: ninor
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+          cd ../ && npm ci
+          cd backend && npx prisma generate && npx prisma migrate deploy
+
+      - name: Start backend
+        run: |
+          cd backend && npm start &  # Start backend in background
+          sleep 5
+
+      - name: Start frontend
+        run: |
+          cd frontend && npm run build && npm start &
+          sleep 5
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: .
+          config-file: cypress.config.ts
+          browser: chrome
+          headed: false
+        env:
+          CYPRESS_API_URL: http://localhost:3001
+          DATABASE_URL: postgresql://ninor:test@localhost:5432/ninor_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Upload E2E screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+
+      - name: Upload E2E videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos/
+
+  security-scan:
+    name: Security Scan
+    needs: [lint, type-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: Run npm audit
+        run: |
+          cd backend && npm audit --audit-level=high
+          cd ../frontend && npm audit --audit-level=high
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  build:
+    name: Build
+    needs: [security-scan, unit-tests]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build backend
+        run: cd backend && npm ci && npm run build
+
+      - name: Build frontend
+        run: cd frontend && npm ci && npm run build
+
+      - name: Build Docker images
+        run: |
+          docker build -t ${{ env.REGISTRY }}/ninor-backend:${{ github.sha }} ./backend
+          docker build -t ${{ env.REGISTRY }}/ninor-frontend:${{ github.sha }} ./frontend
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker images
+        run: |
+          docker push ${{ env.REGISTRY }}/ninor-backend:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/ninor-frontend:${{ github.sha }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Deploy to staging
+        run: |
+          kubectl set image deployment/ninor-backend backend=${{ env.REGISTRY }}/ninor-backend:${{ github.sha }}
+          kubectl set image deployment/ninor-frontend frontend=${{ env.REGISTRY }}/ninor-frontend:${{ github.sha }}
+          kubectl rollout status deployment/ninor-backend
+          kubectl rollout status deployment/ninor-frontend
+
+  performance-tests:
+    name: Performance Tests
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          curl -s https://github.com/loadimpact/k6/releases/download/v0.49.0/k6-v0.49.0-linux-amd64.tar.gz | tar xz
+          sudo mv k6-*/k6 /usr/local/bin/
+
+      - name: Run load test
+        run: k6 run docs/deployment/load-testing/webrtc-signaling.js
+        env:
+          BASE_URL: https://staging.ninor.app
+          TOKEN: ${{ secrets.TEST_TOKEN }}
+
+      - name: Check performance thresholds
+        run: |
+          k6 run docs/deployment/load-testing/api.yml --summary-export=summary.json
+          echo "Performance test completed"
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [performance-tests, e2e-tests]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Deploy to production
+        run: |
+          kubectl apply -f k8s/
+          kubectl rollout status deployment/ninor-backend -n production
+          kubectl rollout status deployment/ninor-frontend -n production
+
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "Deployment to production complete: ${{ github.sha }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

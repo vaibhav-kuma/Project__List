@@ -1,0 +1,70 @@
+name: Production Deployment & CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "staging" ]
+  workflow_dispatch:
+    inputs:
+      rollback_to_sha:
+        description: 'Provide an earlier Git SHA to rollback to'
+        required: false
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: ninor-ecr
+  APP_NAME: ninor
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    # If rollback SHA is provided, checkout that SHA instead
+    - name: Rollback checkout
+      if: github.event.inputs.rollback_to_sha != ''
+      run: git checkout ${{ github.event.inputs.rollback_to_sha }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # --- Containerize NextJS Frontend ---
+    - name: Build, Base, and Push Web ECR Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/web:$IMAGE_TAG -f apps/web/Dockerfile .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY/web:$IMAGE_TAG
+
+    # --- Containerize Express Backend ---
+    - name: Build and Push API ECR Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/api:$IMAGE_TAG -f apps/api/Dockerfile .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY/api:$IMAGE_TAG
+
+  deploy-to-ecs:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+      url: https://${{ github.ref == 'refs/heads/main' && 'admin' || 'staging' }}.ninor.app
+    steps:
+    - name: Update ECS Service via AWS CLI
+      run: |
+        echo "Updating ECS service task definitions..."
+        # Simulated logic: aws ecs update-service --cluster ninor-ecs-${{ env.env_name }} ...

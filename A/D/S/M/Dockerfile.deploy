@@ -1,0 +1,21 @@
+# Docker-based Azure Deployment Helper
+# This allows deployment without installing az/azd on your machine
+
+FROM mcr.microsoft.com/azure-cli:latest
+
+# Install Node.js and Azure Developer CLI
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    git \
+    && curl -fsSL https://aka.ms/azd-installer-linux | bash \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy application files
+COPY . .
+
+# Default command
+CMD ["/bin/bash"]

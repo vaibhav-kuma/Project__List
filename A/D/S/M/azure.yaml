@@ -1,0 +1,157 @@
+# Azure Developer CLI Configuration for DealScout Application
+# This file defines the services and their configuration for deployment to Azure
+
+version: 1.0
+
+# Metadata about the application
+metadata:
+  # The name of the app, should match resource group name or project name
+  name: dealscout
+  description: Autonomous E-commerce Intelligence Agent - Full-stack containerized app
+
+# Services to be deployed and managed by azd
+services:
+  # Main Application Service - Node.js backend with React frontend
+  app:
+    # Relative path to Dockerfile for this service
+    project: .
+    language: js
+    docker:
+      build: Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    
+    # Container configuration
+    host: containerapp
+    
+    # Port configuration for the app service
+    ports:
+      - port: 3001
+        protocol: http
+    
+    # Environment variables for this service
+    environment:
+      - name: NODE_ENV
+        value: production
+      - name: PORT
+        value: "3001"
+      - name: LOG_LEVEL
+        value: info
+      - name: RATE_LIMIT_WINDOW_MS
+        value: "3600000"
+      - name: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - name: DAILY_API_BUDGET
+        value: "1000"
+      - name: API_COST_PER_CALL
+        value: "0.01"
+      - name: MAX_CONCURRENT_JOBS
+        value: "3"
+      - name: SESSION_TIMEOUT_MS
+        value: "1800000"
+      - name: SCREENSHOT_INTERVAL_MS
+        value: "500"
+      - name: MAX_RETRY_ATTEMPTS
+        value: "3"
+      
+      # Database connectivity
+      - name: DB_HOST
+        value: postgres.postgres.svc.cluster.local
+      - name: DB_PORT
+        value: "5432"
+      - name: DB_NAME
+        value: dealscout
+      - name: DB_USER
+        value: dealscout
+      
+      # Redis connectivity
+      - name: REDIS_HOST
+        value: redis.redis.svc.cluster.local
+      - name: REDIS_PORT
+        value: "6379"
+      
+      # Key Vault references for sensitive data (values populated at deployment)
+      - name: DATABASE_URL
+        secretRef: database-url
+      - name: REDIS_URL
+        secretRef: redis-url
+      - name: TINYFISH_API_KEY
+        secretRef: tinyfish-api-key
+      - name: TINYFISH_BASE_URL
+        value: https://api.tinyfish.com/v1
+      - name: JWT_SECRET
+        secretRef: jwt-secret
+      - name: SESSION_SECRET
+        secretRef: session-secret
+  
+  # Worker Service - Background job processor using Bull queue
+  worker:
+    # Relative path to Dockerfile for this service
+    project: .
+    language: js
+    docker:
+      build: Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    
+    # Container configuration
+    host: containerapp
+    
+    # Worker runs in background, no public port needed
+    # Health check configuration will be in Bicep
+    
+    # Environment variables for worker service
+    environment:
+      - name: NODE_ENV
+        value: production
+      - name: LOG_LEVEL
+        value: info
+      - name: WORKER_MODE
+        value: "true"
+      - name: MAX_CONCURRENT_JOBS
+        value: "3"
+      - name: SCREENSHOT_INTERVAL_MS
+        value: "500"
+      - name: MAX_RETRY_ATTEMPTS
+        value: "3"
+      
+      # Database connectivity
+      - name: DB_HOST
+        value: postgres.postgres.svc.cluster.local
+      - name: DB_PORT
+        value: "5432"
+      - name: DB_NAME
+        value: dealscout
+      - name: DB_USER
+        value: dealscout
+      
+      # Redis connectivity
+      - name: REDIS_HOST
+        value: redis.redis.svc.cluster.local
+      - name: REDIS_PORT
+        value: "6379"
+      
+      # Key Vault references for sensitive data
+      - name: DATABASE_URL
+        secretRef: database-url
+      - name: REDIS_URL
+        secretRef: redis-url
+      - name: TINYFISH_API_KEY
+        secretRef: tinyfish-api-key
+      - name: TINYFISH_BASE_URL
+        value: https://api.tinyfish.com/v1
+      - name: JWT_SECRET
+        secretRef: jwt-secret
+      - name: SESSION_SECRET
+        secretRef: session-secret
+
+# Azure resources that will be provisioned/referenced
+azure:
+  # Subscription ID for Azure deployment
+  subscription: 44c11518-f168-4950-96d1-657ba8171ca7
+  
+  # Resource group to contain all resources
+  resourceGroup: Hac4er
+  
+  # Azure region for deployment
+  location: westus2

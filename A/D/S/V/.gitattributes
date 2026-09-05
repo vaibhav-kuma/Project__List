@@ -1,0 +1,37 @@
+# Auto detect text files
+* text=auto
+
+# Source code
+*.ts text diff=typescript
+*.tsx text diff=typescript
+*.js text diff=javascript
+*.jsx text diff=javascript
+*.css text diff=css
+*.json text
+*.md text diff=markdown
+*.yml text
+*.yaml text
+*.prisma text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.avif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+
+# Lock files
+package-lock.json -diff
+yarn.lock -diff
+
+# Generated files
+dist/ -diff
+.next/ -diff
+node_modules/ -diff

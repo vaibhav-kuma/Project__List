@@ -1,0 +1,65 @@
+# Core
+rich>=13.0
+click>=8.1
+pyyaml>=6.0
+requests>=2.31
+aiohttp>=3.9
+asyncio
+httpx>=0.25
+python-dotenv>=1.0
+
+# Database
+sqlalchemy>=2.0
+aiosqlite>=0.19
+
+# DNS/Domain
+python-whois>=0.8
+dnspython>=2.4
+tldextract>=5.0
+
+# Network
+python-nmap>=0.7
+shodan>=1.30
+censys>=2.2
+ipwhois>=1.2
+
+# Social
+sherlock-project>=0.14
+
+# Image/Metadata
+Pillow>=10.0
+exifread>=3.0
+
+# Geo
+geoip2>=4.7
+folium>=0.15
+
+# Scraping
+beautifulsoup4>=4.12
+selenium>=4.15
+playwright>=1.40
+
+# Threat Intel
+virustotal-python>=1.0
+OTXv2>=1.5
+
+# Web Dashboard
+flask>=3.0
+flask-socketio>=5.3
+
+# Reporting
+jinja2>=3.1
+python-docx>=1.0
+fpdf2>=2.7
+matplotlib>=3.8
+
+# Proxy/Tor
+PySocks>=1.7
+stem>=1.8
+
+# Utils
+phonenumbers>=8.13
+validators>=0.22
+colorama>=0.4
+tqdm>=4.66
+networkx>=3.2
