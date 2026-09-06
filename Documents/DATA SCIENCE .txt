@@ -1,0 +1,249 @@
+####DATA SCIENCE ---->
+                                            phase 1 :- introduction to data analytics
+##life cycle -> Discovery--> learn about business domain and asses available resourse , data preparation--> execute ELT(extract, load and transform) , model planning--> identify techniques and data to understand variable relationship , odel building--> develop datasets for testing,training and production , communicate results--> identify key finding business values and develop narrative to convey to stakeholders , Operationalize---> delever final report briefs coder and tehnical document  .
+##process flow :-define goal , identify measurable metrics, (list, collect and extract data from sources)  , explore and analyze data , interpret and visualize data 
+## type :- Descriptive analytics(what happened?) , Diagnostic analysics(why did this happen?)  , predictive analytics(what will happen?) , prescriptive analytics(how can we make it happen?)
+Descriptive analytics :- helps you get historical data  . provides summarized information of facts.--# data aggregation , # data mining (data aggregation is the process of gathering and summarizing information. tools used for data aggregation include MS Excel , MATLAB , SPSS and STATA.
+Diagnostic analytics :- deeper look at the data to unerstand the root causes. data mining(it is the process of sorting large data sets. it helps identify patterns and establish relationships to solve problems.
+Predictive Analytics :- identifies the customers to be included in a promotional campaign for maximizing response.(random forest , support vector machines)###(python , ruby , rapidminer)
+Prescription Analytics :- most recommendation engine are based on prescription analytics.
+### type of analytics : Amazon Example ::: 1.(realized that revenue increased in the west coast in the previous year . increased spending in sales training ) , 2.(purchase factors: price , time , weather and festive seasons. predicted 10% to 12% increased in revenue.), 3. (spent $20 M in different sales training the previous year ) , 4. (identify the sales training that fetch good return on investment (ROI)and impleent an optimization plan )
+Data Analytics Benefits: Decision-Making:---> ## fastrer and better experience (fata-driven companies make better strategic decisions and gain: - OPERATIONAL EFFICIENCCY , higher profit , CUSTOMER SATISFACTION , INCREASED REVENUE) data analytics help you define your target audience based on: (CUSTOMER PREFERENCES , LOCATION-BASED PURCHASES , POPULAR BRANDS OR PRODUCTS ) E-commerce that is based on data analytics helps you: (manage inventory , forecast demands , identify shopping seasons , analyze custoer sentiment , decide optimum prices
+#  cost reduction:- predictive analytics(analyzes current and historical facts , helps you procure products based on purchase history)[shoping pattern , demographic , time of purchase]
+(higher ROI)
+ @@ Data Visualization tools:- allows decisim-makers to see connection between multimensional data , provide new ways to interpret data through graphical representation 
+ //understanding current state of business 
+ //get baluable insights
+ // align new process or products with market needs.
+ 
+ ###-> terminology :- observation(a single row of data from the database [set of observation])
+ data samping :- a statistical analysis technique used to select , maipulate and analyse a representative subset of data points(goal:identify patterns and trends in the larger dataset , representative sample is surveyed instead of entire data )
+ dataset:- medical records , loan application approval records , insurance records 
+ prediction:- what has happened , what is happened
+  type of data :--> structured data- data that is processed stored and retrieved in fixed format  , semi-structured data-- data that contains both structure and unstructure formates, unstructured data-- data that lacks a specific form or structure
+  ## 80% of business data is unstructure like (presetation , email , spreadsheets, documents , image , social media post , web searches , audio and video )
+   analyzing unstructure data(it is primarily used for business intelligence and analytics and is not suited for transaction processing applications.(text-heavy , dates , facts , numbers)/retailer and manufactures analyze unstructure data to: improve customer relationship management processing , perform sentiment analysis on product reviews , enable targeted marketing
+   Qualitative--> classification of objects is based on attributes and properties, it is unstructure data , provided insights about a problem , it is nonstatistical   and quantitative data--> data is measured and expressed numerically, it is structure data , it asks how much or how many? , it is about statistics and numbers.
+   ## data level of measurement :-- it is a classification that describe the nature of information within the value assigned to variable.[nominal - ordinal(relation among the variable obsetvation) - inteval -ratio(observation can have a number is zero)]
+   ## statistical parameters: mean(avg of data) , variance , standard deviation(root of variable)
+@@@$$$###--> data visualization or decision making 
+data visualization :-visualized data is a lot more effective and consumable than a massive spreadsheets.(it is easy to understand)
+leveraging data visualization:- help decision maker stategize for better business outcomes , enable you to provide answer to key business question , provides simplicity , clarity , intuitiveness , insightfulness , pattern and trending capability to help executive take decision) / data visualization allow executives to spot problem and act on them , for example urban data for launch new product and ratio of marging 
+// common using visualization :- heatmap(visualization throgh the color)  , frequency distribution plot(frequency of an event is the number of time the event occurs in an observation , in a graphical way) , swarm plot (it enable you to separate all overlapping point , making each point visible)[ data visualization tools help you orginize and present important data findings]
+.// data visualization tools:- tableau(it is simple o use produce bettr looking interactive visualization)  , fusin charts(base don javascripting charting and visualization), highcharts(fast and flexible) , dtawrapper(csv) , plotly(python ,R) , SiSENSE(full stack analysis platform with drag and drop interface), looker(real time analysis) , domo (real time data multiple widget) , board(full feaure of analysis)
+// language (scale : pyhton,  matplotlib(2D and 3D graph) , R,java , shiny (build web interfacing ) ,boken (like python) /// dashboard based visualization(it vsually tracks analysis and displays key data point to monitpor the health of a business , table ,chart , marging) --## stepo :- analyze your target audience , identify the key business parameter , know the end goal of the dashboard , get hands on in developing the dashboard . improving dashboard based on the outcome . 
+@@@##--> data analyse and machines learning
+// data analytic:- it is the proces of examing and analyzing raw data sets to: drive more information(dtaa science involve gathering , storing analyzing and ploting data to effectively extract useful information)--> [data clearning , preparation and analysis , trend forecast , machine learning and data analyticss]  {overlaping--> extract meaning usefull , machine learning create the platform to learn the data , understand the data from business purpose }  data science process flow :- data acquisition-- collection relevant data  , data wrangling-- choosing right tool from python , R  , analysis , problem solving and business decision // data science and business strategy:-- decision making process is data driven  , define goal , build team , empower management to make better decision various KPIs and parameter strategic change for better result { company like google , facebook using the data science  /facebook using the multiple data type like matural friend and request } multiple industry using the  data scienc like travel industry .
+retail : recency , frequency , monetry / E-commerce like amazon , analytic to track crime , data mining can hellp identify in everything from domestic violence to terrorism. advance analysis can help prevent using information from social media.
+@@@$$$###--> methodology 
+it is a process that driveactivities within a given domain  , it does not depend on technology or tools ,, it is not a set of technology or recipes.
+business understanding--> analytic approach--> data requirement --> data collection--> data understanding --> data preparation --> modeling --> evaluation--> deployment --> feedback { data scientist need a foundational methodology for providing a buusiness strategy.
+@@### ---> data analytic in diffrent sectors 
+product analytic:- know how user engage , track user digital footprinting , analyze user like and dislike , show companies what thier user want , analytic product --> highlike revealed behaviour to help predict consumer demands , identify need to user , it use for user requirement { collection for data in company , website , mobile apps }
+
+                                                  //---> phase 2: data science with python
+learning the python for all lib , modul in python 
+select any python lab : like jupyter , idel , google colab .
+/////--->import pandas as pd
+#l= [x for x in range(5)]
+#s = pd.Series(l)
+#print(s)
+
+df = pd.DataFrame()
+type(df)
+#pd.core.frame.DataFrame
+df=pd.read_csv('PandasEample.csv')
+df.head()
+df.tail()
+df.head(2)
+df.tail(2)
+df.iloc[0]
+df.values
+df=pd.read_csv('PandasEample.csv' , chunksize=2)
+for chunk in df:
+    print(chunk)
+
+ #--> introducton to pandsas panel
+
+import pandas as pd
+df= pd.read_csv("HousePrices.csv", parse_dates=True)
+df.head()
+df.set_index(['city','date'],inplace =True)
+df.index
+df.loc['Seattle']
+df.loc['Seattle'].loc['2014-05-02 00:00:00']
+
+# function of pandas
+#pandas function for data analysic opration are grouped under exhausive categories such as :
+'general function , input output function , series function  , dataframe function , resamping function , plotting function ' 
+# important function in pandas 
+'input or output function allow read and write support of multiple data sourse and formates.'
+'read_exce(io[,sheet_name , header,  names,  ...])'
+'dataFrame.to_excel(excel_write[,..]) --> write into an excel spreadsheet '
+'where --> replace value  '
+'iterrows() --> iterate over dataframe row'
+'conersion , indexing ,  iterating , binary operations '
+'std function return hte standard deviation over the requested acces .'
+# date and time delta
+'timeseries is a series of data point indexed in date or time order.'
+#attribute
+'day , date , month , etc . -day/date related'
+'hour , minute , microsecond , etc. --time-related'
+'timetz , dayofweek, is_month_end, etc. --utility'
+#function
+'strftime() , to_series([keep_tz, index, name]) , to_frame([index, name ])'
+#---> time delta
+' object represents a duration the diffrence between two date or time values.'
+'timedelta(value=<object object > , unit=none, **kwarge)'
+'hour,hours,h or hr'
+'minute , minutes , m or min'
+'second , seconds , sec'
+'microsecond , microseconds, micro , micros'
+'miliseconds , milisecond , mili , milis '
+'nanoseconds , nanosecond , nano , nanos or ns'
+#,,-->function of timedelta
+'isoformat() - to format a timedelta object  into ISO 8601 format'
+'to_pytimedelta() - to convert a pandas timedelta object into a python timedelta object '
+#== IO tools
+'pandas lib provide a number of read an write funtion each packed with set of utility methods'
+'CSV , HTML, XML , JSON , LATEX , SAS , SPSS, SQL , HDFS --/ CSV FILE FORRMATE --> df can be a : series , multidimensional data , tabulated data , dataframe '
+# categorical data 
+'data classification and categorization tasks often inlude categorical data . / classic exaple of categorical data are : blood type , gender , customer rating  , age group / pandas series tabulated data or a dataframe can be set to the categoric data type.  '
+'bloodtype=pd.Series(["a+","b+" ,"o+" , .........])'
+' consider a list of performance grades A, B, C, D, F. awarded to ten student . the performance of every student fail into one of the five categories show below .'
+'Excellent performance , performance vey good , good performance , average performance , failing grade .'
+'create '
+#working with text data 
+'lets say the following data is processed :'
+'text = pd.Series([a,b,c,d,e,d ])' 
+
+$$
+\frac{arg1}{arg2}\\
+x^2\\
+A 
+B_{i}\\
+
+$$
+
+---> python function :-
+def funnction_name():
+''''
+'''
+def helloworld():
+print("helloworld , this is my first function ")
+helloworld()
+output:-
+- len()
+range()
+print()
+input()
+
+def add(x,y):
+return x+y
+# parameter and argument 
+add(5,4)
+
+type(helloworld())
+
+// datatype and sequence:- number
+a=1
+v=1.0
+c=-99
+a='1'
+type(a)
+l=[] ## length of variable 
+l=list()
+
+for i range l:
+print(l[i])
+
+# tuple 
+t=('apple', )
+len(t)
+
+# dictionaries
+d={'a':1, 'v':2}
+d['a']
+
+# string
+#wrie the ''' in the sentense  and string start with in python in 0.
+###:- import csv lib 
+csvfile=open('sample"_file.csv')
+csvReader=csv.reader(csvfile)
+tyrp(csvreader)
+_csv.reader
+for line in csvreader:
+print(line)
+
+with open ('sample_fiel.csv','r')as csvfile:
+csvReader=csv.reader(csvfile)
+count=0
+for line in csvReader:
+if count=0:
+print('header:'+str(line)
+else:
+print('row' +str(line))
+count+=1
+## writing csv file using the python lib 
+with open('sample_file.csv','a') as csvfile:
+csvwriter=csv.writer(csvfile)
+csvwriter.writerrow('aarabhi' , 27 , 'female')
+
+import pandas as pd
+df=pd.read_cscv('sample_fiel.csv')
+df
+
+## object and map function 
+class house :
+def __init__(self,floor,roo,price):
+self.floors=flooors
+home =house(1,3,250000)
+type(home)
+__main__.house
+home.floors
+homw.house-type
+
+del home.floors
+home.floors=2
+home.bthroom=4
+# map #
+
+l={1,2,3,4,5,5}
+def squae(x)
+return x=x^2\\update_list=[]
+update_list=list(map(square,l))
+update_list
+type(map(square,l))
+
+s='helloworl'
+s=map(lambda x:x.upper(),s)
+for i in s:
+print(i , end=" " )
+
+### lambda and list comprehension ###
+s=lambda x: x*x*x
+s(2)
+s(8)
+sum_num=lambdax,y:x+y
+sumnum(4,5)
+--## list comprehensions
+l=[]
+for i in range (10):
+l.append(i)
+l=[x in range (10) if x%2==0]
+l
+string=['odd' if x%2!==0 else even ]
+// datascience is primary applied mathematicll and statical // ease of use and simple systax are some of the other advantage of python . 
+// stat module in api 
+import numpy as np 
+import statsmoduls.apias sm
+impirt statsmoduls.formula.api as smf
+data -sm.dataset.get_rdatset('abc','mjgkbhf').data
+data.head()
+
+###?? scipy :- scipy package is a scientific computation lib , tgat uses numpy in the black end.
+it offeroads of feature for example constants , optimizing graphes and much more that can be useful while dealing with the data 
+from scipy import constants
+dir(constants)
+ constants.pi
+ 

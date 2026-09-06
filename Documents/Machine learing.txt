@@ -1,0 +1,53 @@
+//-->Mechine Learning 
+introduction to ml algorithm
+   different type of ml algorithm
+   python package of ml
+how to apply classification algorithm
+ --> noive bayes , decision tree , k-nearest neighbor , rabdom forest 
+ how to employ automatic feature selection in boruta
+ how to analyze diffrent unsupevised algorithm like clustering and associative algorithms
+ how diffrent recommendation engine work
+ ----> Learning Objective 
+ the team discussed polynomial regression and cohen's kappa measure 
+ Enhance machine learning (ML) skills
+ start with the basic of ML
+ understand the concept , understand the diffrent type of ML algorithm
+ delve deeper into Ml pipeline and MLOps
+ find out more about python package used in ML
+ 
+ 
+ ----# ### Machine learning
+ ML is the ability of a machine to learn from and replicate human behavior. It allows program to learn automatically and make computers more intelligent.
+ though Ml has been in existence for a long time , its adoption has acceleration in recent times.
+ ##factor contributing to adoption--
+ 1. increased data capture through smart device , phone and the internet of things.
+ 2. increase of computation power with edge device (device used by end-users).
+ 3.	better internet connectivity and bandwidths 
+ # key diffrences
+ diffrences between machine learning , deep learning and artificial intelligent(AL).
+ ML,DL,AL are often used interchangeably.
+ Ml refers to algorithm that learn and perform based on the data exposed to it.
+ DL refers to layers of neural networks built with Machine Learning algorithm.
+ AL leverage different techniques including ML,DL.
+ ###$$## problem Solving using AL
+ in the picture below a bot and a human are playing chess.	,, the software program powering the bot requires AL to: Classify data , predict moves , make decisions . 
+ AL make decision with the help of a multi-layered neural network that user DL.
+ Machine Learning is used to classify the profile of the bot's competitor the human as:: beginner , intermediate , advanced 
+ classification is made based on the data parameters used to train this model.
+ algorithm are set of instruction used to solve problems.
+ ML algorithm help to : predict , classify , iprove performance of any software application
+ the predictions by ML used to : 
+ 1. shape policies
+ 2. make weather forecast
+ 3. determine traffic rules, CO2 emission , forest degradation , visibility in the sky , wildfire heatwaves and even the siz of factory chimneys.
+ ### data and ML
+ ML is dependent on data---> performance of algorithmis evaluated based on the quality of the input data.
+ 
+ 
+                           #### type of machine learing #########
+depending on whether the algorithmcan self-train and predict a condition or needs to identify pattern to derive otcome it can be diided into:
+supervised learning --> algorithm uses the data developed in supervised environment to deliver on output.(inout and output are known) .| it may be compared to a workplace scenario where a new employee learns in the presence of his supervisor.
+### methods---> linear regression , logistic regression , support vecto machines , decision trees. 
+Example: prediction of temperature increase when yea wise tempreature incease is known.
+unsupevised learing						   
+reinforcement learning 
