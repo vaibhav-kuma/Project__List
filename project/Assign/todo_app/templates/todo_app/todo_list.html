@@ -1,0 +1,24 @@
+{% extends 'todo_app/base.html' %}
+
+{% block content %}
+    <h1>Todo List</h1>
+    <a href="{% url 'todo_create' %}">Create New Todo</a>
+    <ul>
+    {% for todo in todos %}
+        <li>
+            <span style="text-decoration: {% if todo.completed %}line-through{% endif %}">
+                {{ todo.title }}
+            </span>
+            <a href="{% url 'todo_update' todo.pk %}">Edit</a>
+            <a href="{% url 'todo_delete' todo.pk %}">Delete</a>
+            <form style="display: inline;" action="{% url 'todo_toggle_complete' todo.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Toggle Complete</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>No todos yet.</li>
+    {% endfor %}
+    </ul>
+{% endblock %}
+

@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  @apply bg-ink-950 text-slate-200 antialiased;
+  background-image: radial-gradient(
+      1200px 600px at 70% -10%,
+      rgba(34, 211, 238, 0.06),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at 10% 20%, rgba(167, 139, 250, 0.05), transparent 60%);
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.28);
+  color: #f8fafc;
+}
+
+/* Visible, consistent focus for keyboard users */
+:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Utility layers */
+@layer components {
+  .panel {
+    @apply border border-slate-400/10 bg-white/[0.03] backdrop-blur-sm;
+  }
+
+  .panel-strong {
+    @apply border border-slate-400/15 bg-ink-850/80 backdrop-blur;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.3em] text-pulse;
+  }
+
+  .text-dim {
+    @apply text-slate-400;
+  }
+
+  .hairline {
+    @apply border-slate-400/10;
+  }
+
+  .tech-chip {
+    @apply inline-flex items-center gap-1 rounded border border-slate-400/15 bg-white/[0.04] px-2 py-0.5 font-mono text-[11px] text-slate-300;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-pulse px-5 py-2.5 text-sm font-semibold text-ink-950 transition hover:bg-pulse-soft focus-visible:outline-pulse;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-slate-400/20 px-5 py-2.5 text-sm font-medium text-slate-200 transition hover:border-pulse/50 hover:text-pulse-soft;
+  }
+
+  .section-shell {
+    @apply mx-auto w-full max-w-6xl px-5 md:px-8;
+  }
+}
+
+/* Subtle scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 8px;
+  border: 2px solid #04060b;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Constellation node pulse */
+.node-glow {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node-glow {
+    filter: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Animated architecture flow dots */
+.flow-pulse {
+  left: 0%;
+  animation: flow-x 9s linear infinite;
+}
+
+@keyframes flow-x {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* Grid backdrop used behind canvas fallbacks */
+.lab-grid {
+  background-image: linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 30%, transparent 75%);
+}

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "savedAt": "2026-08-29T06:51:46.188Z",
+  "agents": [],
+  "archived": [],
+  "restorable": [
+    {
+      "id": "jim-mt8okutt",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "a fresh harness",
+      "project": "F:\\Resume\\ninor_project\\A\\D\\recruit-bot",
+      "tmuxTarget": "",
+      "cwd": "F:\\Resume\\ninor_project\\A\\D\\recruit-bot",
+      "status": "idle",
+      "action": "reconnecting…",
+      "progress": 0,
+      "ptyId": "pty-jim-mt8okutt",
+      "command": "claude --model claude-fable-5 --permission-mode bypassPermissions",
+      "provider": "claude",
+      "model": "claude-fable-5"
+    }
+  ],
+  "queues": {},
+  "selectedId": null
+}

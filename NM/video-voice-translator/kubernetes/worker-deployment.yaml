@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: your-repo/backend:latest
+        command: ["celery", "-A", "worker.celery", "worker", "-l", "info"]
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: access_key_id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: secret_access_key
+        - name: AWS_S3_BUCKET_NAME
+          value: "your-s3-bucket-name"
+        - name: REDIS_HOST
+          value: "redis"
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: sentry_dsn
