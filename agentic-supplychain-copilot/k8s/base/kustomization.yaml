@@ -1,0 +1,4 @@
+resources:
+- orchestrator-deployment.yaml
+- nats-deployment.yaml
+- ui-deployment.yaml

@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head><title>Agentic Supply Chain Copilot — Demo UI</title></head>
+<body>
+  <h1>Agentic Supply Chain Copilot — Demo UI</h1>
+  <button onclick="inject()">Inject Demand Spike</button>
+  <button onclick="approve()">Approve Plan</button>
+  <pre id="log"></pre>
+<script>
+async function inject(){
+  const res = await fetch('/api/inject', {method:'POST'});
+  const txt = await res.text();
+  document.getElementById('log').innerText += '\n' + txt;
+}
+async function approve(){
+  const res = await fetch('/api/approve', {method:'POST'});
+  const txt = await res.text();
+  document.getElementById('log').innerText += '\n' + txt;
+}
+</script>
+</body>
+</html>
