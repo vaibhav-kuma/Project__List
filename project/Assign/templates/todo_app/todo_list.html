@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Todo List{% endblock %}
+
+{% block content %}
+    <h1>Todo List</h1>
+    {% for todo in todos %}
+        <div class="todo-item {% if todo.completed %}completed{% endif %}">
+            <h3>{{ todo.title }}</h3>
+            <p>{{ todo.description }}</p>
+            <p>Created: {{ todo.created_at }}</p>
+            <a href="{% url 'todo_edit' todo.id %}">Edit</a>
+            <a href="{% url 'todo_delete' todo.id %}">Delete</a>
+            <form method="post" action="{% url 'todo_complete' todo.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">{% if todo.completed %}Mark Incomplete{% else %}Mark Complete{% endif %}</button>
+            </form>
+        </div>
+    {% empty %}
+        <p>No todos yet.</p>
+    {% endfor %}
+{% endblock %}

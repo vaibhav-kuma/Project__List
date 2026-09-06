@@ -1,0 +1,30 @@
+{
+  "godId": "god",
+  "agents": {
+    "god": {
+      "id": "god",
+      "name": "Michael",
+      "provider": "claude",
+      "cwd": "D:\\tmp",
+      "isGod": true,
+      "role": "orchestrator (god)",
+      "capabilities": [],
+      "status": "idle",
+      "cwdValid": true,
+      "archived": false,
+      "lastSeen": 1787663250125
+    },
+    "jim-mt8okutt": {
+      "id": "jim-mt8okutt",
+      "name": "Jim",
+      "provider": "claude",
+      "cwd": "F:\\Resume\\ninor_project\\A\\D\\recruit-bot",
+      "role": "a fresh harness",
+      "capabilities": [],
+      "status": "idle",
+      "cwdValid": true,
+      "archived": true,
+      "lastSeen": 1787718715839
+    }
+  }
+}
