@@ -1,0 +1,8 @@
+resources:
+- ../../base
+
+images:
+- name: agentic/orchestrator
+  newTag: dev
+- name: agentic/ui
+  newTag: dev

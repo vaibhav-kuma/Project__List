@@ -1,0 +1,11 @@
+resources:
+- ../../base
+
+patchesStrategicMerge:
+- |-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: orchestrator
+  spec:
+    replicas: 2
