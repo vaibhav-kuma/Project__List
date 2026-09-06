@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Todo App{% endblock %}</title>
+</head>
+<body>
+    <header>
+        {% if user.is_authenticated %}
+            <p>Welcome, {{ user.username }}! <a href="{% url 'logout' %}">Logout</a></p>
+        {% else %}
+            <p><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a></p>
+        {% endif %}
+    </header>
+    
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
+

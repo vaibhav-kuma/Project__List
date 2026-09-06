@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "savedAt": "2026-08-25T13:08:32.624Z",
+  "agents": [
+    {
+      "id": "god",
+      "name": "Michael",
+      "character": "michael",
+      "accent": "lemon",
+      "description": "god — runs the floor, triages requests, escalates only critical calls to you",
+      "project": "hive",
+      "tmuxTarget": "",
+      "cwd": "D:\\tmp",
+      "status": "idle",
+      "action": "awaiting",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-god",
+      "command": "claude --model claude-opus-4-8[1m] --permission-mode bypassPermissions",
+      "provider": "claude",
+      "model": "claude-opus-4-8[1m]",
+      "isGod": true
+    },
+    {
+      "id": "jim-mt8okutt",
+      "name": "Jim",
+      "character": "jim",
+      "accent": "sky",
+      "description": "a fresh harness",
+      "project": "F:\\Resume\\ninor_project\\A\\D\\recruit-bot",
+      "tmuxTarget": "",
+      "cwd": "F:\\Resume\\ninor_project\\A\\D\\recruit-bot",
+      "status": "idle",
+      "action": "starting up",
+      "progress": 0,
+      "currentStation": "desk",
+      "ptyId": "pty-jim-mt8okutt",
+      "command": "claude --model claude-fable-5 --permission-mode bypassPermissions",
+      "provider": "claude",
+      "model": "claude-fable-5"
+    }
+  ],
+  "archived": [],
+  "restorable": [],
+  "queues": {},
+  "selectedId": "jim-mt8okutt"
+}

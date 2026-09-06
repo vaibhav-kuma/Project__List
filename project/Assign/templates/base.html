@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Todo App{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 10px; }
+        .todo-item { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+        .completed { text-decoration: line-through; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            {% if user.is_authenticated %}
+                <a href="{% url 'todo_list' %}">Todo List</a>
+                <a href="{% url 'todo_add' %}">Add Todo</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </nav>
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
+
