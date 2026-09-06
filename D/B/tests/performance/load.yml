@@ -1,0 +1,45 @@
+config:
+  target: "http://localhost:4000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up phase"
+    - duration: 120
+      arrivalRate: 50
+      maxVusers: 1500
+      name: "Sustained peak load (1000+ Concurrent)"
+  engines:
+    socketio:
+      transports: ["websocket"]
+  payload:
+    # Load synthetic users for auth injection if needed
+    path: "users.csv"
+    fields:
+      - "userId"
+
+scenarios:
+  - name: "Full Matchmaker Lifecycle Test"
+    engine: "socketio"
+    flow:
+      - emit:
+          channel: "hello"
+          data:
+            userId: "{{ userId }}"
+      - think: 1
+      - emit:
+          channel: "queue:join"
+          data:
+            region: "global"
+      - think: 5 # Simulate wait time in queue
+      # Wait for a match from server
+      - on:
+          channel: "matched"
+          # In a real heavy WebRTC load test, headless Chromium instances (Puppeteer/Playwright) 
+          # would be required actually to stream the video. 
+          # Artillery here focuses purely on the WebSocket signaling plane bottleneck.
+      - think: 15 # Wait out the match timer
+      - emit:
+          channel: "call:end"
+          data:
+            matchId: "mock-match-id"
+            reason: "skip"

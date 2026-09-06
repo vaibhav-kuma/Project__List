@@ -1,0 +1,5 @@
+{
+    "require": {
+        "filament/filament": "^2.17"
+    }
+}

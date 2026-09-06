@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ninor
+  labels:
+    name: ninor
+    environment: production

@@ -1,0 +1,38 @@
+# Default owners for everything
+* @core-team
+
+# Backend
+/backend/ @backend-team
+
+# Frontend
+/frontend/ @frontend-team
+
+# Infrastructure
+/docker-compose*.yml @infra-team
+/nginx.conf @infra-team
+/k8s/ @infra-team
+/.github/workflows/ @infra-team
+
+# Documentation
+/docs/ @docs-team
+/README.md @docs-team
+/CONTRIBUTING.md @docs-team
+
+# Configuration
+/.editorconfig @core-team
+/.gitattributes @core-team
+/.husky/ @core-team
+/commitlint.config.js @core-team
+/.lintstagedrc.json @core-team
+
+# Deployment
+/Dockerfile* @infra-team
+/.dockerignore @infra-team
+
+# Testing
+/cypress/ @qa-team
+/**/__tests__/ @qa-team
+/jest.config.* @qa-team
+
+# Security
+/.github/ISSUE_TEMPLATE/security_report.yml @security-team

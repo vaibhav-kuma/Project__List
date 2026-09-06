@@ -1,0 +1,9 @@
+Json formate :- 
+{"name" : "colab",
+ "age" : 22,
+ "email" :"abc@gmail.com",
+}
+// REST API 
+method - get 
+resource - Entity , item , db record 
+endpoint = method + path 

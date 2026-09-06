@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ninor-backend-config
+  namespace: ninor
+  labels:
+    app: ninor-backend
+data:
+  NODE_ENV: "production"
+  PORT: "3001"
+  FRONTEND_URL: "https://ninor.app"
+  CORS_ORIGIN: "https://ninor.app"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  LOG_LEVEL: "info"
+  REDIS_PREFIX: "ninor:prod:"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ninor-frontend-config
+  namespace: ninor
+  labels:
+    app: ninor-frontend
+data:
+  NEXT_PUBLIC_API_URL: "https://api.ninor.app"
+  NEXT_PUBLIC_SENTRY_DSN: ""  # Override via environment
+  NEXT_PUBLIC_GA_ID: ""       # Override via environment

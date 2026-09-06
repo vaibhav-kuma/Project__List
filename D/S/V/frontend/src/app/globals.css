@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safe area utilities */
+.safe-area-top {
+  padding-top: var(--safe-area-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.safe-area-left {
+  padding-left: var(--safe-area-left);
+}
+
+.safe-area-right {
+  padding-right: var(--safe-area-right);
+}
+
+/* Touch-optimized controls */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Mobile-first video styles */
+video {
+  @apply rounded-lg object-cover;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive container */
+.container-responsive {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Mobile card styles */
+.card-mobile {
+  @apply bg-white rounded-xl shadow-sm p-4 sm:p-6;
+}
+
+/* Mobile button styles */
+.btn-mobile {
+  @apply px-4 py-3 sm:px-6 sm:py-3 rounded-lg font-medium text-sm sm:text-base touch-target;
+}
+
+.btn-primary-mobile {
+  @apply btn-mobile bg-blue-600 hover:bg-blue-700 text-white;
+}
+
+.btn-secondary-mobile {
+  @apply btn-mobile bg-gray-100 hover:bg-gray-200 text-gray-700;
+}
+
+/* Mobile input styles */
+.input-mobile {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base;
+}
+
+/* Mobile list styles */
+.list-item-mobile {
+  @apply p-4 border-b border-gray-100 last:border-b-0;
+}
+
+/* Mobile grid utilities */
+.grid-mobile {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* Mobile typography */
+.heading-mobile {
+  @apply text-xl sm:text-2xl font-bold;
+}
+
+.subheading-mobile {
+  @apply text-base sm:text-lg font-semibold;
+}
+
+.body-mobile {
+  @apply text-sm sm:text-base;
+}
+
+.caption-mobile {
+  @apply text-xs sm:text-sm text-gray-500;
+}
+
+/* Pull to refresh indicator */
+.pull-indicator {
+  @apply absolute top-0 left-0 right-0 flex items-center justify-center transition-transform;
+}
+
+/* Bottom sheet styles */
+.bottom-sheet {
+  @apply fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 max-h-[85vh] overflow-y-auto;
+}
+
+.bottom-sheet-backdrop {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-40;
+}
+
+/* Mobile navigation */
+.mobile-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40;
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.mobile-nav-item {
+  @apply flex flex-col items-center justify-center h-16 touch-target;
+}
+
+/* Mobile header */
+.mobile-header {
+  @apply sticky top-0 z-30 bg-white border-b border-gray-200;
+  padding-top: var(--safe-area-top);
+}
+
+/* Responsive video container */
+.video-container {
+  @apply relative w-full;
+  aspect-ratio: 9/16;
+}
+
+@media (min-width: 768px) {
+  .video-container {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+/* Offline indicator */
+.offline-banner {
+  @apply fixed top-0 left-0 right-0 bg-red-600 text-white py-2 px-4 text-center text-sm z-50;
+  padding-top: calc(var(--safe-area-top) + 0.5rem);
+}
+
+/* Install banner */
+.install-banner {
+  @apply fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-xl shadow-lg p-4 z-40 border border-gray-200;
+}
+
+/* Swipe actions */
+.swipeable {
+  @apply touch-pan-y;
+}
+
+/* Mobile-optimized scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .card-mobile {
+    @apply border border-gray-400;
+  }
+}

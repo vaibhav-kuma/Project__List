@@ -1,0 +1,771 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  male
+  female
+  other
+  undisclosed
+}
+
+enum UserStatus {
+  active
+  suspended
+  banned
+  deleted
+}
+
+enum ModerationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum MomentVisibility {
+  public
+  friends
+}
+
+enum MatchEndReason {
+  timer_elapsed
+  skip
+  disconnect
+  extend_rejected
+  moderator_end
+  error
+}
+
+enum ReportStatus {
+  open
+  triaged
+  in_review
+  closed
+}
+
+enum ReportEvidenceKind {
+  screenshot
+  recording
+  image
+  video
+  other
+}
+
+enum AppealStatus {
+  open
+  in_review
+  accepted
+  rejected
+  closed
+}
+
+enum ModerationActionType {
+  warn
+  timeout
+  suspend
+  ban
+  unban
+  content_remove
+  content_restore
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  incomplete
+  incomplete_expired
+}
+
+enum SubscriptionTier {
+  free
+  plus
+}
+
+enum PaymentProvider {
+  stripe
+  appstore
+  playstore
+}
+
+enum VerificationChannel {
+  email
+  phone
+}
+
+enum VerificationPurpose {
+  register
+  login
+  password_reset
+  change_email
+  change_phone
+}
+
+enum AgeVerificationStatus {
+  not_started
+  pending
+  verified
+  rejected
+}
+
+enum AgeVerificationMethod {
+  document_upload
+  third_party
+  ml_estimation
+  parental_consent
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status       UserStatus @default(active)
+  statusReason String?
+  deletedAt    DateTime?
+
+  email        String? @unique
+  phoneE164    String? @unique
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+
+  lastSeenAt   DateTime?
+  countryCode  String?
+  languageCode String?
+
+  profile   Profile?
+  matchesA  Match[]  @relation("MatchUserA")
+  matchesB  Match[]  @relation("MatchUserB")
+
+  moments   Moment[]
+  momentViews MomentView[]
+  momentReactions MomentReaction[]
+
+  reportsMade     Report[] @relation("ReportsMade")
+  reportsReceived Report[] @relation("ReportsReceived")
+
+  blocksMade      UserBlock[] @relation("BlocksMade")
+  blocksReceived  UserBlock[] @relation("BlocksReceived")
+
+  sanctions       UserSanction[]
+  strikes         UserStrike[]
+  appeals         Appeal[]
+  subscriptions   Subscription[]
+
+  passwordCredential PasswordCredential?
+  refreshTokens      RefreshToken[]
+  verificationCodes  VerificationCode[]
+  twoFactor          TwoFactorSecret?
+  termsAcceptances   TermsAcceptance[]
+  privacySettings    PrivacySettings?
+  parentalConsent    ParentalConsent?
+  ageVerification    AgeVerification?
+  oauthAccounts      OAuthAccount[]
+
+  friendRequestsSent     FriendRequest[] @relation("FriendRequestsSent")
+  friendRequestsReceived FriendRequest[] @relation("FriendRequestsReceived")
+  friendshipsLow         Friend[] @relation("FriendLow")
+  friendshipsHigh        Friend[] @relation("FriendHigh")
+
+  notifications         Notification[]
+
+  segmentExtensionVotes   SegmentExtensionVote[]
+  moderationCasesReported  ModerationCase[] @relation("ModerationCasesReportedUser")
+  moderationActionsTarget  ModerationAction[] @relation("ModerationActionsTargetUser")
+  mlFlags                 MLFlag[]
+  paymentEvents           PaymentEvent[]
+}
+
+model Profile {
+  userId    String @id
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  username   String? @unique
+  displayName String?
+  bio        String?
+  avatarUrl  String?
+
+  dob        DateTime? // store date-only at app layer if you prefer
+  ageBucket  Int?
+  gender     Gender @default(undisclosed)
+
+  preferences Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PasswordCredential {
+  userId     String @id
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash  String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  userAgent  String?
+  ip         String?
+
+  @@index([userId, expiresAt])
+}
+
+model VerificationCode {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channel    VerificationChannel
+  purpose    VerificationPurpose
+  target     String   // email address or phone
+
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  @@index([target, purpose, expiresAt])
+}
+
+model TwoFactorSecret {
+  userId     String @id
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  secretBase32 String
+  enabledAt  DateTime?
+  verifiedAt DateTime?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TermsAcceptance {
+  id         String @id @default(uuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  termsVersion   String
+  privacyVersion String
+  acceptedAt     DateTime @default(now())
+  ip             String?
+  userAgent      String?
+
+  @@index([userId, acceptedAt])
+}
+
+model PrivacySettings {
+  userId     String @id
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  discoverable Boolean @default(true)
+  showAge      Boolean @default(true)
+  showGender   Boolean @default(true)
+  allowFriendRequests Boolean @default(true)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ParentalConsent {
+  userId     String @id
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  parentEmail String
+  consentStatus String @default("pending") // pending|approved|rejected
+  consentedAt DateTime?
+  verificationTokenHash String?
+  tokenExpiresAt DateTime?
+  parentDashboardSecret String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model AgeVerification {
+  userId     String @id
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status     AgeVerificationStatus @default(not_started)
+  method     AgeVerificationMethod?
+  verifiedAt DateTime?
+
+  provider   String? // stripe_identity|persona|onfido|etc
+  providerSessionId String?
+
+  docFrontUrl String?
+  docBackUrl  String?
+  selfieUrl   String?
+  metadata    Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OAuthAccount {
+  id          String @id @default(uuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider    String // google|apple
+  providerUserId String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([provider, providerUserId])
+  @@index([userId, provider])
+}
+
+model Match {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  region      String?
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  endReason   MatchEndReason?
+  durationSeconds Int?
+  networkMetrics Json?
+
+  userAId     String
+  userBId     String
+  userA       User @relation("MatchUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB       User @relation("MatchUserB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  segments    MatchSegment[]
+  reports     Report[]
+
+  moderationCases ModerationCase[] @relation("ModerationCasesMatch")
+  mlFlags         MLFlag[] @relation("MLFlagsMatch")
+}
+
+model MatchSegment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  matchId      String
+  match        Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  segmentIndex   Int
+  plannedSeconds Int @default(15)
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+
+  extensionVotes SegmentExtensionVote[]
+
+  @@unique([matchId, segmentIndex])
+}
+
+model SegmentExtensionVote {
+  segmentId String
+  segment   MatchSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+
+  userId   String
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  decision Boolean
+  createdAt DateTime @default(now())
+
+  @@id([segmentId, userId])
+}
+
+model Moment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  caption   String?
+  mediaKind String
+  mimeType  String
+  mediaUrl  String
+  thumbnailUrl String?
+  metadata  Json?
+  status    ModerationStatus @default(pending)
+  visibility MomentVisibility @default(public)
+
+  viewCount     Int @default(0)
+  reactionCount Int @default(0)
+
+  views     MomentView[]
+  reactions MomentReaction[]
+  reports   Report[]
+
+  moderationCases ModerationCase[] @relation("ModerationCasesMoment")
+  mlFlags         MLFlag[] @relation("MLFlagsMoment")
+}
+
+model MomentView {
+  momentId String
+  moment   Moment @relation(fields: [momentId], references: [id], onDelete: Cascade)
+
+  viewerUserId String
+  viewer       User @relation(fields: [viewerUserId], references: [id], onDelete: Cascade)
+
+  viewedAt DateTime @default(now())
+
+  @@id([momentId, viewerUserId])
+}
+
+model MomentReaction {
+  momentId String
+  moment   Moment @relation(fields: [momentId], references: [id], onDelete: Cascade)
+
+  userId   String
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reaction String // 'like', 'fire', etc.
+  createdAt DateTime @default(now())
+
+  @@id([momentId, userId])
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  reporterId String
+  reporter   User     @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  reportedUserId String
+  reportedUser   User  @relation("ReportsReceived", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  matchId   String?
+  match     Match? @relation(fields: [matchId], references: [id], onDelete: SetNull)
+
+  momentId  String?
+  moment    Moment? @relation(fields: [momentId], references: [id], onDelete: SetNull)
+
+  reasonCode String
+  details   String?
+  status    ReportStatus @default(open)
+  triageScore Float?
+  metadata  Json?
+
+  moderationCase ModerationCase?
+
+  evidence  ReportEvidence[]
+  strikes   UserStrike[]
+}
+
+model ReportEvidence {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  reportId  String
+  report    Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  kind      ReportEvidenceKind @default(other)
+  mimeType  String?
+  fileUrl   String
+  fileSha256 String?
+  metadata  Json?
+
+  @@index([reportId, createdAt])
+}
+
+model ModerationCase {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  status    String   @default("open")
+
+  reportedUserId String?
+  reportedUser   User? @relation("ModerationCasesReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+
+  reportId  String? @unique
+  report    Report? @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  momentId  String?
+  moment    Moment? @relation("ModerationCasesMoment", fields: [momentId], references: [id], onDelete: SetNull)
+
+  matchId   String?
+  match     Match? @relation("ModerationCasesMatch", fields: [matchId], references: [id], onDelete: SetNull)
+
+  assignedTo String?
+  resolvedAt DateTime?
+  resolutionNote String?
+
+  actions   ModerationAction[]
+
+  strikes   UserStrike[]
+}
+
+model ModerationAction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  caseId    String?
+  caze      ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  targetUserId String?
+  targetUser   User? @relation("ModerationActionsTargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  action    ModerationActionType
+  reason    String
+  actorUserId String?
+  expiresAt DateTime?
+  metadata  Json?
+
+  appeals   Appeal[]
+}
+
+model MLFlag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  modelName   String
+  modelVersion String?
+  score       Float
+  label       String
+  decision    String?
+  metadata    Json?
+
+  matchId String?
+  match   Match? @relation("MLFlagsMatch", fields: [matchId], references: [id], onDelete: SetNull)
+
+  momentId String?
+  moment   Moment? @relation("MLFlagsMoment", fields: [momentId], references: [id], onDelete: SetNull)
+
+  userId  String?
+  user    User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model UserBlock {
+  userId String
+  user   User @relation("BlocksMade", fields: [userId], references: [id], onDelete: Cascade)
+
+  blockedUserId String
+  blockedUser   User @relation("BlocksReceived", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  reason    String?
+
+  @@id([userId, blockedUserId])
+}
+
+model UserSanction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action    ModerationActionType
+  reason    String
+  createdBy String?
+  expiresAt DateTime?
+  metadata  Json?
+}
+
+model UserStrike {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  points    Int
+  reasonCode String
+  source    String // report|ml|manual
+
+  caseId    String?
+  caze      ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  reportId  String?
+  report    Report? @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  mlFlagId  String?
+  metadata  Json?
+
+  @@index([userId, createdAt])
+  @@index([caseId])
+  @@index([reportId])
+}
+
+model Appeal {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status    AppealStatus @default(open)
+
+  appellantUserId String
+  appellant       User @relation(fields: [appellantUserId], references: [id], onDelete: Cascade)
+
+  moderationActionId String?
+  moderationAction   ModerationAction? @relation(fields: [moderationActionId], references: [id], onDelete: SetNull)
+
+  userSanctionId String?
+  summary   String
+  details   String?
+  evidenceUrls Json?
+
+  assignedTo String?
+  resolvedAt DateTime?
+  resolutionNote String?
+
+  @@index([status, createdAt])
+  @@index([appellantUserId, createdAt])
+  @@index([moderationActionId])
+}
+
+model FriendRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  respondedAt DateTime?
+  accepted  Boolean?
+
+  matchId   String? // optional: the video chat match it originated from
+
+  fromUserId String
+  fromUser   User @relation("FriendRequestsSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+  toUserId   String
+  toUser     User @relation("FriendRequestsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+}
+
+model Friend {
+  userIdLow  String
+  userLow    User @relation("FriendLow", fields: [userIdLow], references: [id], onDelete: Cascade)
+
+  userIdHigh String
+  userHigh   User @relation("FriendHigh", fields: [userIdHigh], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@id([userIdLow, userIdHigh])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String
+  payload   Json?
+  readAt    DateTime?
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userIdLow  String
+  userIdHigh String
+  lastMessageAt DateTime?
+
+  messages  Message[]
+
+  @@unique([userIdLow, userIdHigh])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderUserId String
+  recipientUserId String
+
+  body      String
+  deliveredAt DateTime?
+  readAt    DateTime?
+
+  @@index([conversationId, createdAt])
+  @@index([recipientUserId, createdAt])
+}
+
+model FriendCall {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  userIdA   String
+  userIdB   String
+  roomId    String
+  endReason String?
+
+  @@index([userIdA, startedAt])
+  @@index([userIdB, startedAt])
+}
+
+model SubscriptionPlan {
+  id        String @id
+  createdAt DateTime @default(now())
+  priceCents Int
+  currency  String
+  interval  String
+  active    Boolean @default(true)
+  tier      SubscriptionTier @default(free)
+  // Optional: link to Stripe/PayPal price ids for real billing
+  providerPriceId String?
+  entitlements Json?
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id        String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider  PaymentProvider
+  providerCustomerId String?
+  providerSubId String?
+
+  planId    String
+  plan      SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  status    SubscriptionStatus
+  currentPeriodStart DateTime?
+  currentPeriodEnd DateTime?
+  trialEndsAt DateTime?
+  cancelAtPeriodEnd Boolean @default(false)
+  canceledAt DateTime?
+
+  @@unique([provider, providerSubId])
+  @@index([userId, status, currentPeriodEnd])
+  @@index([providerCustomerId])
+}
+
+model PaymentEvent {
+  id        String @id @default(uuid())
+  createdAt DateTime @default(now())
+  provider  PaymentProvider
+  providerEventId String @unique
+  userId    String?
+  user      User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payload   Json
+}
+

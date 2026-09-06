@@ -1,0 +1,56 @@
+name: Ninor CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    # --- Unit & Integration Tests (Backend) ---
+    - name: Generate Prisma Types
+      run: npm run prisma:generate -w apps/api
+
+    - name: Run Backend Unit Tests (Jest)
+      run: npm run test -w apps/api
+
+    # --- Frontend E2E / Unit Tests ---
+    - name: Build Next.js App
+      run: npm run build -w apps/web
+
+    - name: Run Cypress E2E Tests
+      uses: cypress-io/github-action@v5
+      with:
+        build: npm run build -w apps/web
+        start: npm run start -w apps/web
+        wait-on: 'http://localhost:3000'
+        command: npx cypress run
+
+    # --- Deploy Step (Mock) ---
+    - name: Deploy to Cloud (Simulated)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo "Building optimized docker containers..."
+        echo "Deploying via Kubernetes rolling update..."
